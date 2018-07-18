@@ -40,13 +40,15 @@ public:
     void postResource(const QUrl &url, const QByteArray &data);
     void deleteResource(const QUrl &url);
 
+signals:
+    void onRequestCompleted(QNetworkReply *reply);
+
 private slots:
     QList<QSslError> onSSLErrorsReceived(QNetworkReply* reply, QList<QSslError> sslError);
     QNetworkAccessManager::NetworkAccessibility onNetworkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility state);
-    QNetworkReply *onRequestCompleted(QNetworkReply *reply);
 
 private:
-    QNetworkReply prepareRequest(const QUrl &url);
+    QNetworkRequest prepareRequest(const QUrl &url);
     QNetworkAccessManager *QNAM;
     QString m_userAgent;
     QString m_acceptHeader;

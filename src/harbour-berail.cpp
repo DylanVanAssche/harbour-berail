@@ -30,13 +30,15 @@
 #include "os.h"
 #include "api.h"
 #include "models/station.h"
+#include <QtTest>
+#include "../tests/httptest.h"
 
 // Add toString() method to all custom method
 
 int main(int argc, char *argv[])
 {
     // Set up qml engine.
-    QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
+    /*QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
     QScopedPointer<QQuickView> view(SailfishApp::createView());
     qApp->setApplicationVersion(QString(APP_VERSION));
 
@@ -76,5 +78,8 @@ int main(int argc, char *argv[])
     view->setSource(SailfishApp::pathTo("qml/harbour-berail.qml"));
     view->show();
 
-    return app->exec();
+    return app->exec();*/
+    HTTPTest testSuite;
+    QCoreApplication app(argc, argv); // Allow QEventLoops
+    return QTest::qExec(&testSuite, argc, argv) | app.exec();
 }

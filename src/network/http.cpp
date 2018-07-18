@@ -37,7 +37,7 @@ HTTP::HTTP(QObject *parent) : QObject(parent)
     // Connect QNetworkAccessManager signals
     connect(QNAM, SIGNAL(networkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility)), this, SLOT(onNetworkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility)));
     connect(QNAM, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)), this, SLOT(onSSLErrorsReceived(QNetworkReply*,QList<QSslError>)));
-    connect(QNAM, SIGNAL(finished(QNetworkReply*)), this, SLOT(onRequestCompleted(QNetworkReply*)));
+    connect(QNAM, SIGNAL(finished(QNetworkReply*)), this, SIGNAL(onRequestCompleted(QNetworkReply*)));
 
     // Create HTTP client information
     this->setUserAgent(QString("%1/%2 (%3)").arg("BeRail-LC", "V0.0.1", "2.2.0.29"));
@@ -108,7 +108,7 @@ void HTTP::deleteResource(const QUrl &url)
  * Everytime a HTTP request has been made by the user it needs several default headers to complete it's mission.
  * The prepareRequest method just does that, it adds the Accept, User-Agent header to the request and allows redirects.
  */
-QNetworkRequest API::prepareRequest(const QUrl &url)
+QNetworkRequest HTTP::prepareRequest(const QUrl &url)
 {
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, this->acceptHeader());
@@ -118,22 +118,6 @@ QNetworkRequest API::prepareRequest(const QUrl &url)
 }
 
 // Handlers
-/**
- * @file http.cpp
- * @author Dylan Van Assche
- * @date 17 Jul 2018
- * @brief Request completed signal
- * @param QNetworkReply *reply
- * @return QNetworkReply *reply
- *
- * As soon as HTTP request has been completed, the data will be available as a QNetworkReply* reply through this signal.
- */
-QNetworkReply *HTTP::onRequestCompleted(QNetworkReply *reply)
-{
-    qDebug() << "Request finished";
-    return reply;
-}
-
 /**
  * @file http.cpp
  * @author Dylan Van Assche

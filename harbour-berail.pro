@@ -19,6 +19,7 @@
 TARGET = harbour-berail
 
 CONFIG += sailfishapp
+QT+=testlib
 
 QT += core \
     network \
@@ -102,7 +103,8 @@ HEADERS += \
     src/models/stationlistmodelfilter.h \
     src/models/stopvia.h \
     src/models/stopabstract.h \
-    src/network/http.h
+    src/network/http.h \
+    tests/httptest.h
 
 SOURCES += src/harbour-berail.cpp \
     src/logger.cpp \
@@ -128,7 +130,8 @@ SOURCES += src/harbour-berail.cpp \
     src/models/stationlistmodelfilter.cpp \
     src/models/stopvia.cpp \
     src/models/stopabstract.cpp \
-    src/network/http.cpp
+    src/network/http.cpp \
+    tests/httptest.cpp
 
 OTHER_FILES += qml/harbour-berail.qml \
     qml/cover/CoverPage.qml \
