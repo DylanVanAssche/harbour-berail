@@ -4,22 +4,22 @@
 #include <QObject>
 #include <QtTest/QtTest>
 #include <QSignalSpy>
-#include "../src/network/http.h"
+#include "../src/network/httpmanager.h"
 
 class HTTPTest : public QObject
 {
     Q_OBJECT
 
 private slots:
-    void initHTTP();
-    void getRequest();
-    void cleanHTTP();
+    void initHTTPManager();
+    void runHTTPManagerTest();
+    void cleanHTTPManager();
 
 public slots:
     void processReply(QNetworkReply *reply);
 
 private:
-    HTTP *http;
+    HTTPManager *http;
 };
 
 #endif // HTTPTEST_H

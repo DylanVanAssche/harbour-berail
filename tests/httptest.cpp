@@ -1,12 +1,12 @@
 #include "httptest.h"
 
-void HTTPTest::initHTTP() {
+void HTTPTest::initHTTPManager() {
     qDebug() << "Init HTTP";
-    http = new HTTP();
+    http = new HTTPManager();
     connect(http, SIGNAL(onRequestCompleted(QNetworkReply*)), this, SLOT(processReply(QNetworkReply*)));
 }
 
-void HTTPTest::getRequest()
+void HTTPTest::runHTTPManagerTest()
 {
     // Activate QSignalSpy
     QSignalSpy spy(http, SIGNAL(onRequestCompleted(QNetworkReply *)));
@@ -30,7 +30,7 @@ void HTTPTest::getRequest()
     QVERIFY(spy.wait(2000));
 }
 
-void HTTPTest::cleanHTTP()
+void HTTPTest::cleanHTTPManager()
 {
     qDebug() << "Cleaning up HTTP";
     http->deleteLater();

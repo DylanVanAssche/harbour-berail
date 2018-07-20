@@ -17,17 +17,17 @@
  *   License along with BeRail.  If not, see <http://www.gnu.org/licenses/>.  *
  ******************************************************************************/
 
-#include "http.h"
+#include "httpmanager.h"
 
 /**
- * @file http.cpp
+ * @file httpmanager.cpp
  * @author Dylan Van Assche
  * @date 17 Jul 2018
- * @brief HTTP facade constructor
- * Constructs a HTTP facade to access the network using the HTTP protocol.
- * The HTTP facade makes network access in Qt abstract from the underlying library (QNetworkAccessManager, libCurl, ...).
+ * @brief HTTPManager facade constructor
+ * Constructs a HTTPManager facade to access the network using the HTTP protocol.
+ * The HTTPManager facade makes network access in Qt abstract from the underlying library (QNetworkAccessManager, libCurl, ...).
  */
-HTTP::HTTP(QObject *parent) : QObject(parent)
+HTTPManager::HTTPManager(QObject *parent) : QObject(parent)
 {
     // Initiate a new QNetworkAccessManager with cache
     QNAM = new QNetworkAccessManager(this);
@@ -46,7 +46,7 @@ HTTP::HTTP(QObject *parent) : QObject(parent)
 
 // Invokers
 /**
- * @file http.cpp
+ * @file httpmanager.cpp
  * @author Dylan Van Assche
  * @date 17 Jul 2018
  * @brief Get a resource
@@ -55,7 +55,7 @@ HTTP::HTTP(QObject *parent) : QObject(parent)
  * Retrieves a certain resource from the given QUrl url.
  * The result as a QNetworkReply *reply will be available as soon as the onRequestCompleted signal is fired.
  */
-void HTTP::getResource(const QUrl &url)
+void HTTPManager::getResource(const QUrl &url)
 {
     qDebug() << "GET resource";
     QNetworkRequest request = this->prepareRequest(url);
@@ -63,7 +63,7 @@ void HTTP::getResource(const QUrl &url)
 }
 
 /**
- * @file http.cpp
+ * @file httpmanager.cpp
  * @author Dylan Van Assche
  * @date 17 Jul 2018
  * @brief Post to a resource
@@ -72,7 +72,7 @@ void HTTP::getResource(const QUrl &url)
  * Posts data to a certain resource from the given QUrl url.
  * The result as a QNetworkReply *reply will be available as soon as the onRequestCompleted signal is fired.
  */
-void HTTP::postResource(const QUrl &url, const QByteArray &data)
+void HTTPManager::postResource(const QUrl &url, const QByteArray &data)
 {
     qDebug() << "POST resource";
     QNetworkRequest request = this->prepareRequest(url);
@@ -80,7 +80,7 @@ void HTTP::postResource(const QUrl &url, const QByteArray &data)
 }
 
 /**
- * @file http.cpp
+ * @file httpmanager.cpp
  * @author Dylan Van Assche
  * @date 17 Jul 2018
  * @brief Delete a resource
@@ -89,7 +89,7 @@ void HTTP::postResource(const QUrl &url, const QByteArray &data)
  * Deletes a certain resource from the given QUrl url.
  * The result as a QNetworkReply *reply will be available as soon as the onRequestCompleted signal is fired.
  */
-void HTTP::deleteResource(const QUrl &url)
+void HTTPManager::deleteResource(const QUrl &url)
 {
     qDebug() << "DELETE resource";
     QNetworkRequest request = this->prepareRequest(url);
@@ -98,7 +98,7 @@ void HTTP::deleteResource(const QUrl &url)
 
 // Helpers
 /**
- * @file http.cpp
+ * @file httpmanager.cpp
  * @author Dylan Van Assche
  * @date 17 Jul 2018
  * @brief Prepare the HTTP request
@@ -108,7 +108,7 @@ void HTTP::deleteResource(const QUrl &url)
  * Everytime a HTTP request has been made by the user it needs several default headers to complete it's mission.
  * The prepareRequest method just does that, it adds the Accept, User-Agent header to the request and allows redirects.
  */
-QNetworkRequest HTTP::prepareRequest(const QUrl &url)
+QNetworkRequest HTTPManager::prepareRequest(const QUrl &url)
 {
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, this->acceptHeader());
@@ -119,7 +119,7 @@ QNetworkRequest HTTP::prepareRequest(const QUrl &url)
 
 // Handlers
 /**
- * @file http.cpp
+ * @file httpmanager.cpp
  * @author Dylan Van Assche
  * @date 17 Jul 2018
  * @brief Network accessible signal
@@ -130,14 +130,14 @@ QNetworkRequest HTTP::prepareRequest(const QUrl &url)
  * The QNetworkAccessManager::NetworkAccessibility enum contains all the possible network states.
  * @see https://doc.qt.io/qt-5.6/qnetworkaccessmanager.html#NetworkAccessibility-enum
  */
-QNetworkAccessManager::NetworkAccessibility HTTP::onNetworkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility state)
+QNetworkAccessManager::NetworkAccessibility HTTPManager::onNetworkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility state)
 {
     qDebug() << "Network accessiblity state changed:" << state;
     return state;
 }
 
 /**
- * @file http.cpp
+ * @file httpmanager.cpp
  * @author Dylan Van Assche
  * @date 17 Jul 2018
  * @brief SSL errors received signal
@@ -146,7 +146,7 @@ QNetworkAccessManager::NetworkAccessibility HTTP::onNetworkAccessibleChanged(QNe
  *
  * The user can listen to the signal to react on SSL errors.
  */
-QList<QSslError> HTTP::onSSLErrorsReceived(QNetworkReply *reply, QList<QSslError> sslError)
+QList<QSslError> HTTPManager::onSSLErrorsReceived(QNetworkReply *reply, QList<QSslError> sslError)
 {
     qCritical() << "SSL Error!" << sslError;
     return sslError;
@@ -154,7 +154,7 @@ QList<QSslError> HTTP::onSSLErrorsReceived(QNetworkReply *reply, QList<QSslError
 
 // Getter & Setters
 /**
- * @file http.cpp
+ * @file httpmanager.cpp
  * @author Dylan Van Assche
  * @date 17 Jul 2018
  * @brief Gets the current user agent
@@ -162,13 +162,13 @@ QList<QSslError> HTTP::onSSLErrorsReceived(QNetworkReply *reply, QList<QSslError
  *
  * Retrieves the current user agent used to make requests in this HTTP instance.
  */
-QString HTTP::userAgent() const
+QString HTTPManager::userAgent() const
 {
     return m_userAgent;
 }
 
 /**
- * @file http.cpp
+ * @file httpmanager.cpp
  * @author Dylan Van Assche
  * @date 17 Jul 2018
  * @brief Sets the current user agent
@@ -176,13 +176,13 @@ QString HTTP::userAgent() const
  *
  * Changes the current user agent to the given QString.
  */
-void HTTP::setUserAgent(const QString &userAgent)
+void HTTPManager::setUserAgent(const QString &userAgent)
 {
     m_userAgent = userAgent;
 }
 
 /**
- * @file http.cpp
+ * @file httpmanager.cpp
  * @author Dylan Van Assche
  * @date 17 Jul 2018
  * @brief Get the current accept header
@@ -190,13 +190,13 @@ void HTTP::setUserAgent(const QString &userAgent)
  *
  * Retrieves the current accept header used to make requests in this HTTP instance.
  */
-QString HTTP::acceptHeader() const
+QString HTTPManager::acceptHeader() const
 {
     return m_acceptHeader;
 }
 
 /**
- * @file http.cpp
+ * @file httpmanager.cpp
  * @author Dylan Van Assche
  * @date 17 Jul 2018
  * @brief Sets the current accept header
@@ -204,7 +204,7 @@ QString HTTP::acceptHeader() const
  *
  * Changes the current accept header to the given QString.
  */
-void HTTP::setAcceptHeader(const QString &acceptHeader)
+void HTTPManager::setAcceptHeader(const QString &acceptHeader)
 {
     m_acceptHeader = acceptHeader;
 }

@@ -17,8 +17,8 @@
  *   License along with BeRail.  If not, see <http://www.gnu.org/licenses/>.  *
  ******************************************************************************/
 
-#ifndef HTTP_H
-#define HTTP_H
+#ifndef HTTPMANAGER_H
+#define HTTPMANAGER_H
 
 #include <QObject>
 #include <QtCore/QUrl>
@@ -27,11 +27,11 @@
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkConfigurationManager>
 
-class HTTP : public QObject
+class HTTPManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit HTTP(QObject *parent = nullptr);
+    explicit HTTPManager(QObject *parent = nullptr);
     QString userAgent() const;
     void setUserAgent(const QString &userAgent);
     QString acceptHeader() const;
@@ -54,4 +54,4 @@ private:
     QString m_acceptHeader;
 };
 
-#endif // HTTP_H
+#endif // HTTPMANAGER_H
