@@ -13,19 +13,16 @@ void HTTPTest::runHTTPManagerTest()
 
     // HTTP GET
     http->getResource(QUrl("https://httpbin.org/get"));
-
     // Wait for signal
     QVERIFY(spy.wait(2000));
 
     // HTTP POST
     http->postResource(QUrl("https://httpbin.org/post"), QByteArray("HTTP POST OK"));
-
     // Wait for signal
     QVERIFY(spy.wait(2000));
 
     // HTTP DELETE
     http->deleteResource(QUrl("https://httpbin.org/delete"));
-
     // Wait for signal
     QVERIFY(spy.wait(2000));
 }

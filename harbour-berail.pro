@@ -19,11 +19,12 @@
 TARGET = harbour-berail
 
 CONFIG += sailfishapp
-QT+=testlib
 
 QT += core \
     network \
-    positioning
+    positioning \
+    testlib \
+    sql
 
 # OS module notification support
 PKGCONFIG += nemonotifications-qt5
@@ -82,58 +83,18 @@ RESOURCES += \
 HEADERS += \
     src/logger.h \
     src/os.h \
-    src/api.h \
-    src/models/enum.h \
-    src/models/station.h \
-    src/models/alert.h \
-    src/models/disturbances.h \
-    src/models/liveboard.h \
-    src/models/vehicle.h \
-    src/models/stop.h \
-    src/models/connection.h \
-    src/models/via.h \
-    src/models/alertlistmodel.h \
-    src/models/stoplistmodel.h \
-    src/models/vehiclelistmodel.h \
-    src/models/stationlistmodel.h \
-    src/models/connectionlistmodel.h \
-    src/models/vialistmodel.h \
-    src/models/announcements.h \
-    src/models/remarks.h \
-    src/models/stationlistmodelfilter.h \
-    src/models/stopvia.h \
-    src/models/stopabstract.h \
     tests/httptest.h \
     src/database/databasemanager.h \
-    src/network/httpmanager.h
+    src/network/httpmanager.h \
+    src/models/connection.h
 
 SOURCES += src/harbour-berail.cpp \
     src/logger.cpp \
     src/os.cpp \
-    src/api.cpp \
-    src/models/station.cpp \
-    src/models/alert.cpp \
-    src/models/disturbances.cpp \
-    src/models/liveboard.cpp \
-    src/models/vehicle.cpp \
-    src/models/stop.cpp \
-    src/models/connection.cpp \
-    src/models/via.cpp \
-    src/models/enum.cpp \
-    src/models/alertlistmodel.cpp \
-    src/models/stoplistmodel.cpp \
-    src/models/vehiclelistmodel.cpp \
-    src/models/stationlistmodel.cpp \
-    src/models/connectionlistmodel.cpp \
-    src/models/vialistmodel.cpp \
-    src/models/announcements.cpp \
-    src/models/remarks.cpp \
-    src/models/stationlistmodelfilter.cpp \
-    src/models/stopvia.cpp \
-    src/models/stopabstract.cpp \
     tests/httptest.cpp \
     src/database/databasemanager.cpp \
-    src/network/httpmanager.cpp
+    src/network/httpmanager.cpp \
+    src/models/connection.cpp
 
 OTHER_FILES += qml/harbour-berail.qml \
     qml/cover/CoverPage.qml \
