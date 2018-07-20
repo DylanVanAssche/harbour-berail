@@ -158,12 +158,6 @@
         <source>Stations</source>
         <translation>Stationen</translation>
     </message>
-    <message id="berail-liveboard-error">
-        <source>Retrieving liveboard failed, please try again later</source>
-        <extracomment>Error shown to the user when the liveboard of the station can&apos;t be retrieved</extracomment>
-        <translation type="unfinished"></translation>
-        <extra-The>liveboard is a list of all departing/arriving trains in a station.</extra-The>
-    </message>
     <message id="berail-select-station">
         <source>Select station</source>
         <extracomment>When clicked, the user will see a list of station from which the user can choose one.</extracomment>
@@ -171,16 +165,6 @@
     </message>
     <message id="berail-canceled">
         <source>Canceled</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message id="berail-json-error">
-        <source>Invalid JSON data received, please try again later</source>
-        <extracomment>Error shown to the user when the data is invalid JSON data</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message id="berail-ssl-error">
-        <source>SSL error, please check your device is running with the correct date and time</source>
-        <extracomment>Error shown to the user when an SSL error occurs due a bad certificate or incorrect time settings.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message id="berail-transport-show">
@@ -229,12 +213,6 @@
     </message>
     <message id="berail-oops-hint">
         <source>Something went wrong, please try again later</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message id="berail-api-error">
-        <source>iRail API couldn&apos;t complete your request</source>
-        <oldsource>iRail API couldn&apos;t find your data</oldsource>
-        <extracomment>Error shown to the user when the iRail API failed to retrieve the requested data</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message id="berail-trip-missed-via">
