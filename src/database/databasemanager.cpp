@@ -44,10 +44,10 @@ DatabaseManager::DatabaseManager(QString path)
 void DatabaseManager::execute(QSqlQuery query)
 {
     if(this->database().isOpen() && query.exec()) {
-        qInfo() << "Creating table OK:" << query.executedQuery();
+        qDebug() << "Executing querry OK:" << query.executedQuery();
     }
     else {
-        qCritical() << "Cannot create table:" << query.lastError().text();
+        qCritical() << "Executing querry FAILED:" << query.lastError().text();
     }
 }
 
