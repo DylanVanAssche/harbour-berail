@@ -1,6 +1,8 @@
 #ifndef DATABASEMANAGER_H
 #define DATABASEMANAGER_H
 
+#include <QtGlobal>
+#include <QtDebug>
 #include <QObject>
 #include <QSqlDatabase>
 #include <QSqlDriver>
@@ -14,11 +16,13 @@ class DatabaseManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit DatabaseManager(QObject *parent = nullptr);
+    explicit DatabaseManager(QString path);
     void execute(QSqlQuery query);
+    QSqlDatabase database() const;
 
 private:
-    QSqlDatabase database;
+    QSqlDatabase m_database;
+    void setDatabase(const QSqlDatabase &database);
 };
 
 #endif // DATABASEMANAGER_H

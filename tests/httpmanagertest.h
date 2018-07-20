@@ -1,18 +1,17 @@
-#ifndef HTTPTEST_H
-#define HTTPTEST_H
+#ifndef HTTPMANAGERTEST_H
+#define HTTPMANAGERTEST_H
 
 #include <QObject>
 #include <QtTest/QtTest>
 #include <QSignalSpy>
 #include "../src/network/httpmanager.h"
 
-class HTTPTest : public QObject
+class HTTPManagerTest : public QObject
 {
     Q_OBJECT
-
 private slots:
     void initHTTPManager();
-    void runHTTPManagerTest();
+    void runHTTPManager();
     void cleanHTTPManager();
 
 public slots:
@@ -22,4 +21,4 @@ private:
     HTTPManager *http;
 };
 
-#endif // HTTPTEST_H
+#endif // HTTPMANAGERTEST_H

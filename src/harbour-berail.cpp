@@ -28,10 +28,9 @@
 
 #include "logger.h"
 #include "os.h"
-#include "api.h"
-#include "models/station.h"
 #include <QtTest>
-#include "../tests/httptest.h"
+#include "../tests/httpmanagertest.h"
+#include "../tests/databasemanagertest.h"
 
 // Add toString() method to all custom method
 
@@ -79,7 +78,8 @@ int main(int argc, char *argv[])
     view->show();
 
     return app->exec();*/
-    HTTPTest testSuite;
+    HTTPManagerTest testSuiteHTTP;
+    DatabaseManagerTest testSuiteDB;
     QCoreApplication app(argc, argv); // Allow QEventLoops
-    return QTest::qExec(&testSuite, argc, argv) | app.exec();
+    return QTest::qExec(&testSuiteHTTP, argc, argv) | QTest::qExec(&testSuiteDB, argc, argv) | app.exec();
 }

@@ -24,10 +24,11 @@
  * @author Dylan Van Assche
  * @date 17 Jul 2018
  * @brief HTTPManager facade constructor
+ * @public
  * Constructs a HTTPManager facade to access the network using the HTTP protocol.
  * The HTTPManager facade makes network access in Qt abstract from the underlying library (QNetworkAccessManager, libCurl, ...).
  */
-HTTPManager::HTTPManager(QObject *parent) : QObject(parent)
+HTTPManager::HTTPManager()
 {
     // Initiate a new QNetworkAccessManager with cache
     QNAM = new QNetworkAccessManager(this);
@@ -35,8 +36,8 @@ HTTPManager::HTTPManager(QObject *parent) : QObject(parent)
     QNAM->setConfiguration(QNAMConfig.defaultConfiguration());
 
     // Connect QNetworkAccessManager signals
-    connect(QNAM, SIGNAL(networkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility)), this, SLOT(onNetworkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility)));
-    connect(QNAM, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)), this, SLOT(onSSLErrorsReceived(QNetworkReply*,QList<QSslError>)));
+    connect(QNAM, SIGNAL(networkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility)), this, SIGNAL(onNetworkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility)));
+    connect(QNAM, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)), this, SIGNAL(onSSLErrorsReceived(QNetworkReply*,QList<QSslError>)));
     connect(QNAM, SIGNAL(finished(QNetworkReply*)), this, SIGNAL(onRequestCompleted(QNetworkReply*)));
 
     // Create HTTP client information
@@ -51,7 +52,7 @@ HTTPManager::HTTPManager(QObject *parent) : QObject(parent)
  * @date 17 Jul 2018
  * @brief Get a resource
  * @param QUrl url
- *
+ * @public
  * Retrieves a certain resource from the given QUrl url.
  * The result as a QNetworkReply *reply will be available as soon as the onRequestCompleted signal is fired.
  */
@@ -68,7 +69,7 @@ void HTTPManager::getResource(const QUrl &url)
  * @date 17 Jul 2018
  * @brief Post to a resource
  * @param const QUrl &url
- *
+ * @public
  * Posts data to a certain resource from the given QUrl url.
  * The result as a QNetworkReply *reply will be available as soon as the onRequestCompleted signal is fired.
  */
@@ -85,7 +86,7 @@ void HTTPManager::postResource(const QUrl &url, const QByteArray &data)
  * @date 17 Jul 2018
  * @brief Delete a resource
  * @param const QUrl &url
- *
+ * @public
  * Deletes a certain resource from the given QUrl url.
  * The result as a QNetworkReply *reply will be available as soon as the onRequestCompleted signal is fired.
  */
@@ -104,7 +105,7 @@ void HTTPManager::deleteResource(const QUrl &url)
  * @brief Prepare the HTTP request
  * @param const QUrl &url
  * @return QNetworkRequest request
- *
+ * @public
  * Everytime a HTTP request has been made by the user it needs several default headers to complete it's mission.
  * The prepareRequest method just does that, it adds the Accept, User-Agent header to the request and allows redirects.
  */
@@ -117,41 +118,6 @@ QNetworkRequest HTTPManager::prepareRequest(const QUrl &url)
     return request;
 }
 
-// Handlers
-/**
- * @file httpmanager.cpp
- * @author Dylan Van Assche
- * @date 17 Jul 2018
- * @brief Network accessible signal
- * @param QNetworkAccessManager::NetworkAccessibility state
- * @return QNetworkAccessManager::NetworkAccessibility state
- *
- * The user can listen to the signal to react on network state changes.
- * The QNetworkAccessManager::NetworkAccessibility enum contains all the possible network states.
- * @see https://doc.qt.io/qt-5.6/qnetworkaccessmanager.html#NetworkAccessibility-enum
- */
-QNetworkAccessManager::NetworkAccessibility HTTPManager::onNetworkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility state)
-{
-    qDebug() << "Network accessiblity state changed:" << state;
-    return state;
-}
-
-/**
- * @file httpmanager.cpp
- * @author Dylan Van Assche
- * @date 17 Jul 2018
- * @brief SSL errors received signal
- * @param QList<QSslError> sslError
- * @return QList<QSslError> sslError
- *
- * The user can listen to the signal to react on SSL errors.
- */
-QList<QSslError> HTTPManager::onSSLErrorsReceived(QNetworkReply *reply, QList<QSslError> sslError)
-{
-    qCritical() << "SSL Error!" << sslError;
-    return sslError;
-}
-
 // Getter & Setters
 /**
  * @file httpmanager.cpp
@@ -159,7 +125,7 @@ QList<QSslError> HTTPManager::onSSLErrorsReceived(QNetworkReply *reply, QList<QS
  * @date 17 Jul 2018
  * @brief Gets the current user agent
  * @return QString userAgent
- *
+ * @public
  * Retrieves the current user agent used to make requests in this HTTP instance.
  */
 QString HTTPManager::userAgent() const
@@ -173,7 +139,7 @@ QString HTTPManager::userAgent() const
  * @date 17 Jul 2018
  * @brief Sets the current user agent
  * @param const QString &userAgent
- *
+ * @public
  * Changes the current user agent to the given QString.
  */
 void HTTPManager::setUserAgent(const QString &userAgent)
@@ -187,7 +153,7 @@ void HTTPManager::setUserAgent(const QString &userAgent)
  * @date 17 Jul 2018
  * @brief Get the current accept header
  * @return QString acceptHeader
- *
+ * @public
  * Retrieves the current accept header used to make requests in this HTTP instance.
  */
 QString HTTPManager::acceptHeader() const
@@ -201,7 +167,7 @@ QString HTTPManager::acceptHeader() const
  * @date 17 Jul 2018
  * @brief Sets the current accept header
  * @param const QString &acceptHeader
- *
+ * @public
  * Changes the current accept header to the given QString.
  */
 void HTTPManager::setAcceptHeader(const QString &acceptHeader)

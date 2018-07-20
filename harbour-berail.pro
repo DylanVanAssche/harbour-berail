@@ -83,18 +83,20 @@ RESOURCES += \
 HEADERS += \
     src/logger.h \
     src/os.h \
-    tests/httptest.h \
     src/database/databasemanager.h \
     src/network/httpmanager.h \
-    src/models/connection.h
+    src/models/connection.h \
+    tests/httpmanagertest.h \
+    tests/databasemanagertest.h
 
 SOURCES += src/harbour-berail.cpp \
     src/logger.cpp \
     src/os.cpp \
-    tests/httptest.cpp \
     src/database/databasemanager.cpp \
     src/network/httpmanager.cpp \
-    src/models/connection.cpp
+    src/models/connection.cpp \
+    tests/httpmanagertest.cpp \
+    tests/databasemanagertest.cpp
 
 OTHER_FILES += qml/harbour-berail.qml \
     qml/cover/CoverPage.qml \

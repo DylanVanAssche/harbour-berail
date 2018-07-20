@@ -31,7 +31,7 @@ class HTTPManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit HTTPManager(QObject *parent = nullptr);
+    explicit HTTPManager();
     QString userAgent() const;
     void setUserAgent(const QString &userAgent);
     QString acceptHeader() const;
@@ -42,8 +42,6 @@ public:
 
 signals:
     void onRequestCompleted(QNetworkReply *reply);
-
-private slots:
     QList<QSslError> onSSLErrorsReceived(QNetworkReply* reply, QList<QSslError> sslError);
     QNetworkAccessManager::NetworkAccessibility onNetworkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility state);
 
