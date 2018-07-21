@@ -10,7 +10,7 @@
 void HTTPManagerTest::initHTTPManager() {
     qDebug() << "Init HTTP";
     http = new HTTPManager();
-    connect(http, SIGNAL(onRequestCompleted(QNetworkReply*)), this, SLOT(processReply(QNetworkReply*)));
+    connect(http, SIGNAL(requestCompleted(QNetworkReply*)), this, SLOT(processReply(QNetworkReply*)));
 }
 
 /**
@@ -41,6 +41,11 @@ void HTTPManagerTest::runHTTPManager()
 
     // HTTP DELETE
     http->deleteResource(QUrl("https://httpbin.org/delete"));
+    // Wait for signal
+    QVERIFY(spy.wait(2000));
+
+    // HTTP POST
+    http->headResource(QUrl("https://httpbin.org/get"));
     // Wait for signal
     QVERIFY(spy.wait(2000));
 }

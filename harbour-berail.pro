@@ -26,6 +26,8 @@ QT += core \
     testlib \
     sql
 
+CONFIG += c++11
+
 # OS module notification support
 PKGCONFIG += nemonotifications-qt5
 QT += dbus
@@ -85,18 +87,18 @@ HEADERS += \
     src/os.h \
     src/database/databasemanager.h \
     src/network/httpmanager.h \
-    src/models/connection.h \
     tests/httpmanagertest.h \
-    tests/databasemanagertest.h
+    tests/databasemanagertest.h \
+    src/linkedconnections/linkedconnection.h
 
 SOURCES += src/harbour-berail.cpp \
     src/logger.cpp \
     src/os.cpp \
     src/database/databasemanager.cpp \
     src/network/httpmanager.cpp \
-    src/models/connection.cpp \
     tests/httpmanagertest.cpp \
-    tests/databasemanagertest.cpp
+    tests/databasemanagertest.cpp \
+    src/linkedconnections/linkedconnection.cpp
 
 OTHER_FILES += qml/harbour-berail.qml \
     qml/cover/CoverPage.qml \

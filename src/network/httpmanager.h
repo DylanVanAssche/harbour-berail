@@ -31,19 +31,22 @@ class HTTPManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit HTTPManager();
+    explicit HTTPManager(QObject *parent = nullptr);
     QString userAgent() const;
     void setUserAgent(const QString &userAgent);
     QString acceptHeader() const;
     void setAcceptHeader(const QString &acceptHeader);
-    void getResource(const QUrl &url);
+    void getResource(const QUrl &url, const QUrlQuery &parameters = nullptr);
     void postResource(const QUrl &url, const QByteArray &data);
     void deleteResource(const QUrl &url);
+    void headResource(const QUrl &url);
 
 signals:
-    void onRequestCompleted(QNetworkReply *reply);
-    QList<QSslError> onSSLErrorsReceived(QNetworkReply* reply, QList<QSslError> sslError);
-    QNetworkAccessManager::NetworkAccessibility onNetworkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility state);
+    void requestCompleted(QNetworkReply *reply);
+    QList<QSslError> sslErrorsReceived(QNetworkReply* reply, QList<QSslError> sslError);
+    QNetworkAccessManager::NetworkAccessibility networkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility state);
+    void userAgentChanged();
+    void acceptHeaderChanged();
 
 private:
     QNetworkRequest prepareRequest(const QUrl &url);

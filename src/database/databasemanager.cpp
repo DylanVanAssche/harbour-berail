@@ -12,8 +12,11 @@
  * The DatabaseManager facade makes database access in Qt abstract from the underlying database (SQLite, MySQL, ORACLE, ...).
  * Any errors during initialisation of the database are catched and logged as CRITICAL.
  */
-DatabaseManager::DatabaseManager(QString path)
+DatabaseManager::DatabaseManager(QString path, QObject *parent)
 {
+    // Set parent of this QObject. When parent is destroyed, this one is automatically cleaned up too.
+    this->setParent(parent);
+
     if(QSqlDatabase::isDriverAvailable(DRIVER)) {
         this->setDatabase(QSqlDatabase::addDatabase(DRIVER));
         this->database().setDatabaseName(path);

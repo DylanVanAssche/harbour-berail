@@ -16,7 +16,7 @@ class DatabaseManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit DatabaseManager(QString path);
+    explicit DatabaseManager(QString path, QObject *parent = nullptr);
     void execute(QSqlQuery query);
     QSqlDatabase database() const;
 

@@ -10,6 +10,11 @@ void DatabaseManagerTest::runDatabaseManager()
     // Create a QSqlQuery object and connect it to our database
     QSqlQuery query(db->database());
 
+    // Drop test TABLE if exists
+    QVERIFY(query.prepare("DROP TABLE IF EXISTS people")); // Preparing is succesfull when method returns true
+    db->execute(query);
+    query.clear(); // Release resources for reuse
+
     // Create test TABLE
     QVERIFY(query.prepare("CREATE TABLE people (id INTEGER PRIMARY KEY, name TEXT)")); // Preparing is succesfull when method returns true
     db->execute(query);

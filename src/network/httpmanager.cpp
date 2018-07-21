@@ -28,17 +28,20 @@
  * Constructs a HTTPManager facade to access the network using the HTTP protocol.
  * The HTTPManager facade makes network access in Qt abstract from the underlying library (QNetworkAccessManager, libCurl, ...).
  */
-HTTPManager::HTTPManager()
+HTTPManager::HTTPManager(QObject* parent): QObject(parent)
 {
+    // Set parent of this QObject. When parent is destroyed, this one is automatically cleaned up too.
+    this->setParent(parent);
+
     // Initiate a new QNetworkAccessManager with cache
     QNAM = new QNetworkAccessManager(this);
     QNetworkConfigurationManager QNAMConfig;
     QNAM->setConfiguration(QNAMConfig.defaultConfiguration());
 
     // Connect QNetworkAccessManager signals
-    connect(QNAM, SIGNAL(networkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility)), this, SIGNAL(onNetworkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility)));
-    connect(QNAM, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)), this, SIGNAL(onSSLErrorsReceived(QNetworkReply*,QList<QSslError>)));
-    connect(QNAM, SIGNAL(finished(QNetworkReply*)), this, SIGNAL(onRequestCompleted(QNetworkReply*)));
+    connect(QNAM, SIGNAL(networkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility)), this, SIGNAL(networkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility)));
+    connect(QNAM, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)), this, SIGNAL(sslErrorsReceived(QNetworkReply*,QList<QSslError>)));
+    connect(QNAM, SIGNAL(finished(QNetworkReply*)), this, SIGNAL(requestCompleted(QNetworkReply*)));
 
     // Create HTTP client information
     this->setUserAgent(QString("%1/%2 (%3)").arg("BeRail-LC", "V0.0.1", "2.2.0.29"));
@@ -51,14 +54,19 @@ HTTPManager::HTTPManager()
  * @author Dylan Van Assche
  * @date 17 Jul 2018
  * @brief Get a resource
- * @param QUrl url
+ * @param const QUrl &url
+ * @param const QUrlQuery &parameters = nullptr
  * @public
- * Retrieves a certain resource from the given QUrl url.
- * The result as a QNetworkReply *reply will be available as soon as the onRequestCompleted signal is fired.
+ * Retrieves a certain resource from the given QUrl url using a GET request.
+ * The result as a QNetworkReply *reply will be available as soon as the requestCompleted signal is fired.
  */
-void HTTPManager::getResource(const QUrl &url)
+void HTTPManager::getResource(const QUrl &url, const QUrlQuery &parameters = nullptr)
 {
-    qDebug() << "GET resource";
+    qDebug() << "GET resource:" << url;
+    if(parameters != nullptr) {
+        qDebug() << "Processing GET parameters";
+        url.setQuery(parameters);
+    }
     QNetworkRequest request = this->prepareRequest(url);
     QNAM->get(request);
 }
@@ -70,12 +78,12 @@ void HTTPManager::getResource(const QUrl &url)
  * @brief Post to a resource
  * @param const QUrl &url
  * @public
- * Posts data to a certain resource from the given QUrl url.
- * The result as a QNetworkReply *reply will be available as soon as the onRequestCompleted signal is fired.
+ * Posts data to a certain resource from the given QUrl url using a POST request.
+ * The result as a QNetworkReply *reply will be available as soon as the requestCompleted signal is fired.
  */
 void HTTPManager::postResource(const QUrl &url, const QByteArray &data)
 {
-    qDebug() << "POST resource";
+    qDebug() << "POST resource:" << url;
     QNetworkRequest request = this->prepareRequest(url);
     QNAM->post(request, data);
 }
@@ -87,14 +95,31 @@ void HTTPManager::postResource(const QUrl &url, const QByteArray &data)
  * @brief Delete a resource
  * @param const QUrl &url
  * @public
- * Deletes a certain resource from the given QUrl url.
- * The result as a QNetworkReply *reply will be available as soon as the onRequestCompleted signal is fired.
+ * Deletes a certain resource from the given QUrl url using a DELETE request.
+ * The result as a QNetworkReply *reply will be available as soon as the requestCompleted signal is fired.
  */
 void HTTPManager::deleteResource(const QUrl &url)
 {
-    qDebug() << "DELETE resource";
+    qDebug() << "DELETE resource:" << url;
     QNetworkRequest request = this->prepareRequest(url);
     QNAM->deleteResource(request);
+}
+
+/**
+ * @file httpmanager.cpp
+ * @author Dylan Van Assche
+ * @date 21 Jul 2018
+ * @brief Head a resource
+ * @param const QUrl &url
+ * @public
+ * Retrieves the headers of the resource from the given QUrl url using a HEAD request.
+ * The result as a QNetworkReply *reply will be available as soon as the requestCompleted signal is fired.
+ */
+void HTTPManager::headResource(const QUrl &url)
+{
+    qDebug() << "HEAD resource:" << url;
+    QNetworkRequest request = this->prepareRequest(url);
+    QNAM->head(request);
 }
 
 // Helpers
