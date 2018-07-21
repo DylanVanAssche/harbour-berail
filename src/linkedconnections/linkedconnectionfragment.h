@@ -17,17 +17,17 @@
  *   License along with BeRail.  If not, see <http://www.gnu.org/licenses/>.  *
  ******************************************************************************/
 
-#ifndef LINKEDCONNECTION_H
-#define LINKEDCONNECTION_H
+#ifndef LINKEDCONNECTIONFRAGMENT_H
+#define LINKEDCONNECTIONFRAGMENT_H
 
 #include <QObject>
 
-class LinkedConnection : public QObject
+class LinkedConnectionFragment : public QObject
 {
     Q_OBJECT
 public:
-    explicit LinkedConnection(QObject *parent = nullptr);
-    explicit LinkedConnection(
+    explicit LinkedConnectionFragment(QObject *parent = nullptr);
+    explicit LinkedConnectionFragment(
             const QUrl &uri,
             const QUrl &departureStationURI,
             const QUrl &arrivalStationURI,
@@ -87,4 +87,4 @@ private:
     // pickUp and dropOff types as enums could be added later
 };
 
-#endif // LINKEDCONNECTION_H
+#endif // LINKEDCONNECTIONFRAGMENT_H
