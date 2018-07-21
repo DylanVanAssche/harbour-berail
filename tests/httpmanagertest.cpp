@@ -26,10 +26,11 @@
  * @brief HTTPManagerTest init
  * Init HTTPManagerTest
  */
-void HTTPManagerTest::initHTTPManager() {
+void HTTPManagerTest::initHTTPManager()
+{
     qDebug() << "Init HTTP";
-    http = new HTTPManager();
-    connect(http, SIGNAL(requestCompleted(QNetworkReply*)), this, SLOT(processReply(QNetworkReply*)));
+    http = HTTPManager::getInstance();
+    connect(http, SIGNAL(requestCompleted(QNetworkReply *)), this, SLOT(processReply(QNetworkReply *)));
 }
 
 /**
@@ -46,27 +47,27 @@ void HTTPManagerTest::initHTTPManager() {
 void HTTPManagerTest::runHTTPManager()
 {
     // Activate QSignalSpy
-    QSignalSpy spy(http, SIGNAL(onRequestCompleted(QNetworkReply *)));
+    QSignalSpy spy(http, SIGNAL(requestCompleted(QNetworkReply *)));
 
     // HTTP GET
     http->getResource(QUrl("https://httpbin.org/get"));
     // Wait for signal
-    QVERIFY(spy.wait(2000));
+    QVERIFY(spy.wait());
 
     // HTTP POST
     http->postResource(QUrl("https://httpbin.org/post"), QByteArray("HTTP POST OK"));
     // Wait for signal
-    QVERIFY(spy.wait(2000));
+    QVERIFY(spy.wait());
 
     // HTTP DELETE
     http->deleteResource(QUrl("https://httpbin.org/delete"));
     // Wait for signal
-    QVERIFY(spy.wait(2000));
+    QVERIFY(spy.wait());
 
     // HTTP POST
     http->headResource(QUrl("https://httpbin.org/get"));
     // Wait for signal
-    QVERIFY(spy.wait(2000));
+    QVERIFY(spy.wait());
 }
 
 /**

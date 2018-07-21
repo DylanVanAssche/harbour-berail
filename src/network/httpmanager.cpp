@@ -18,6 +18,7 @@
  ******************************************************************************/
 
 #include "httpmanager.h"
+HTTPManager* HTTPManager::m_instance = nullptr;
 
 /**
  * @file httpmanager.cpp
@@ -34,18 +35,27 @@ HTTPManager::HTTPManager(QObject* parent): QObject(parent)
     this->setParent(parent);
 
     // Initiate a new QNetworkAccessManager with cache
-    QNAM = new QNetworkAccessManager(this);
+    this->setQNAM(new QNetworkAccessManager(this));
     QNetworkConfigurationManager QNAMConfig;
-    QNAM->setConfiguration(QNAMConfig.defaultConfiguration());
+    this->QNAM()->setConfiguration(QNAMConfig.defaultConfiguration());
 
     // Connect QNetworkAccessManager signals
-    connect(QNAM, SIGNAL(networkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility)), this, SIGNAL(networkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility)));
-    connect(QNAM, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)), this, SIGNAL(sslErrorsReceived(QNetworkReply*,QList<QSslError>)));
-    connect(QNAM, SIGNAL(finished(QNetworkReply*)), this, SIGNAL(requestCompleted(QNetworkReply*)));
+    connect(this->QNAM(), SIGNAL(networkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility)), this, SIGNAL(networkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility)));
+    connect(this->QNAM(), SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)), this, SIGNAL(sslErrorsReceived(QNetworkReply*,QList<QSslError>)));
+    connect(this->QNAM(), SIGNAL(finished(QNetworkReply*)), this, SIGNAL(requestCompleted(QNetworkReply*)));
 
     // Create HTTP client information
     this->setUserAgent(QString("%1/%2 (%3)").arg("BeRail-LC", "V0.0.1", "2.2.0.29"));
     this->setAcceptHeader(QString("application/ld+json"));
+}
+
+HTTPManager *HTTPManager::getInstance(QObject *parent)
+{
+    if(m_instance == nullptr) {
+        qDebug() << "Creating new HTTPManager";
+        m_instance = new HTTPManager(parent);
+    }
+    return m_instance;
 }
 
 // Invokers
@@ -55,20 +65,15 @@ HTTPManager::HTTPManager(QObject* parent): QObject(parent)
  * @date 17 Jul 2018
  * @brief Get a resource
  * @param const QUrl &url
- * @param const QUrlQuery &parameters = nullptr
  * @public
- * Retrieves a certain resource from the given QUrl url using a GET request.
+ * Retrieves a certain resource from the given QUrl &url using a GET request.
  * The result as a QNetworkReply *reply will be available as soon as the requestCompleted signal is fired.
  */
-void HTTPManager::getResource(const QUrl &url, const QUrlQuery &parameters = nullptr)
+void HTTPManager::getResource(const QUrl &url)
 {
     qDebug() << "GET resource:" << url;
-    if(parameters != nullptr) {
-        qDebug() << "Processing GET parameters";
-        url.setQuery(parameters);
-    }
     QNetworkRequest request = this->prepareRequest(url);
-    QNAM->get(request);
+    this->QNAM()->get(request);
 }
 
 /**
@@ -85,7 +90,7 @@ void HTTPManager::postResource(const QUrl &url, const QByteArray &data)
 {
     qDebug() << "POST resource:" << url;
     QNetworkRequest request = this->prepareRequest(url);
-    QNAM->post(request, data);
+    this->QNAM()->post(request, data);
 }
 
 /**
@@ -102,7 +107,7 @@ void HTTPManager::deleteResource(const QUrl &url)
 {
     qDebug() << "DELETE resource:" << url;
     QNetworkRequest request = this->prepareRequest(url);
-    QNAM->deleteResource(request);
+    this->QNAM()->deleteResource(request);
 }
 
 /**
@@ -119,7 +124,7 @@ void HTTPManager::headResource(const QUrl &url)
 {
     qDebug() << "HEAD resource:" << url;
     QNetworkRequest request = this->prepareRequest(url);
-    QNAM->head(request);
+    this->QNAM()->head(request);
 }
 
 // Helpers
@@ -198,4 +203,32 @@ QString HTTPManager::acceptHeader() const
 void HTTPManager::setAcceptHeader(const QString &acceptHeader)
 {
     m_acceptHeader = acceptHeader;
+}
+
+/**
+ * @file httpmanager.cpp
+ * @author Dylan Van Assche
+ * @date 21 Jul 2018
+ * @brief Sets the current accept header
+ * @param const QString &acceptHeader
+ * @public
+ * Changes the current accept header to the given QString.
+ */
+QNetworkAccessManager *HTTPManager::QNAM() const
+{
+    return m_QNAM;
+}
+
+/**
+ * @file httpmanager.cpp
+ * @author Dylan Van Assche
+ * @date 21 Jul 2018
+ * @brief Sets the current accept header
+ * @param const QString &acceptHeader
+ * @public
+ * Changes the current accept header to the given QString.
+ */
+void HTTPManager::setQNAM(QNetworkAccessManager *value)
+{
+    m_QNAM = value;
 }

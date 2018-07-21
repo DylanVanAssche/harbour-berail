@@ -18,6 +18,7 @@
  ******************************************************************************/
 
 #include "databasemanager.h"
+DatabaseManager* DatabaseManager::m_instance = nullptr;
 
 /**
  * @file databasemanager.cpp
@@ -55,21 +56,42 @@ DatabaseManager::DatabaseManager(QString path, QObject *parent)
 /**
  * @file databasemanager.cpp
  * @author Dylan Van Assche
+ * @date 21 Jul 2018
+ * @brief Gets a DatabaseManager instance
+ * @public
+ * Gets a DatabaseManager instance using the Singleton pattern.
+ */
+DatabaseManager *DatabaseManager::getInstance(QString path, QObject *parent)
+{
+    // NICE-TO-HAVE: Allow access to multiple databases by checking the path of the database
+    if(m_instance == nullptr) {
+        qDebug() << "Creating new DatabaseManager";
+        m_instance = new DatabaseManager(path, parent);
+    }
+    return m_instance;
+}
+
+/**
+ * @file databasemanager.cpp
+ * @author Dylan Van Assche
  * @date 20 Jul 2018
  * @brief Executes a given QSqlQuery
  * @param QSqlQuery query
+ * @return bool success
  * @public
  * Executes the given QSqlQuery query on the active database.
  * Before the execution takes place, the connection is checked.
  * During the execution, the errors are catched and logged as CRITICAL.
  */
-void DatabaseManager::execute(QSqlQuery query)
+bool DatabaseManager::execute(QSqlQuery query)
 {
     if(this->database().isOpen() && query.exec()) {
         qDebug() << "Executing querry OK:" << query.executedQuery();
+        return true;
     }
     else {
         qCritical() << "Executing querry FAILED:" << query.lastError().text();
+        return false;
     }
 }
 
@@ -92,6 +114,7 @@ void DatabaseManager::setDatabase(const QSqlDatabase &database)
  * @author Dylan Van Assche
  * @date 20 Jul 2018
  * @brief Gets the current QSqlDatabase database
+ * @return QSqlDatabase database
  * @public
  * Gets the QSqlDatabase database and returns it.
  */
@@ -99,4 +122,3 @@ QSqlDatabase DatabaseManager::database() const
 {
     return m_database;
 }
-

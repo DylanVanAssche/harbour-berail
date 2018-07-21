@@ -17,36 +17,25 @@
  *   License along with BeRail.  If not, see <http://www.gnu.org/licenses/>.  *
  ******************************************************************************/
 
-#ifndef DATABASEMANAGER_H
-#define DATABASEMANAGER_H
+#ifndef LINKEDCONNECTIONFRAGMENTTEST_H
+#define LINKEDCONNECTIONFRAGMENTTEST_H
 
-#include <QtCore/QtGlobal>
-#include <QtCore/QtDebug>
-#include <QtCore/QObject>
-#include <QtCore/QString>
-#include <QtCore/QDir>
-#include <QtSql/QSqlDatabase>
-#include <QtSql/QSqlDriver>
-#include <QtSql/QSqlError>
-#include <QtSql/QSqlQuery>
+#include <QObject>
+#include <QtTest/QtTest>
+#include <QSignalSpy>
+#include "../src/linkedconnections/linkedconnectionfragment.h"
 
-// Select here the right DB driver for Qt
-#define DRIVER "QSQLITE"
-
-// Singleton pattern
-class DatabaseManager : public QObject
+class LinkedConnectionFragmentTest: public QObject
 {
     Q_OBJECT
-public:
-    static DatabaseManager *getInstance(QString path, QObject *parent = nullptr);
-    bool execute(QSqlQuery query);
-    QSqlDatabase database() const;
+private slots:
+    void initLinkedConnectionFragment();
+    void runLinkedConnectionFragment();
+    void cleanLinkedConnectionFragment();
 
 private:
-    QSqlDatabase m_database;
-    explicit DatabaseManager(QString path, QObject *parent);
-    static DatabaseManager *m_instance;
-    void setDatabase(const QSqlDatabase &database);
+    LinkedConnectionFragment *lcWithoutDelay;
+    LinkedConnectionFragment *lcWithDelay;
 };
 
-#endif // DATABASEMANAGER_H
+#endif // LINKEDCONNECTIONFRAGMENTTEST_H

@@ -25,6 +25,8 @@
 #include <QSignalSpy>
 #include "../src/network/httpmanager.h"
 
+#define SIGNAL_WAIT_TIME 3000
+
 class HTTPManagerTest : public QObject
 {
     Q_OBJECT

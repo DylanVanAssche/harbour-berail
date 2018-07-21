@@ -26,7 +26,8 @@
  * @brief LinkedConnectionFragment constructor: empty
  * @param QObject *parent = nullptr
  * @public
- * Constructs a LinkedConnectionFragment to store the information about a Linked Connection fragment for the Connection Scan Algorithm (CSA).
+ * Constructs a LinkedConnectionFragment to store the information about
+ * a Linked Connection fragment for the Connection Scan Algorithm (CSA).
  */
 LinkedConnectionFragment::LinkedConnectionFragment(QObject *parent) : QObject(parent)
 {
@@ -51,9 +52,21 @@ LinkedConnectionFragment::LinkedConnectionFragment(QObject *parent) : QObject(pa
  * @param const QString &direction
  * @param QObject *parent = nullptr
  * @public
- * Constructs a LinkedConnectionFragment to store the information about a Linked Connection fragment for the Connection Scan Algorithm (CSA).
+ * Constructs a LinkedConnectionFragment to store the information about
+ * a Linked Connection fragment for the Connection Scan Algorithm (CSA).
  */
-LinkedConnectionFragment::LinkedConnectionFragment(const QUrl &uri, const QUrl &departureStationURI, const QUrl &arrivalStationURI, const QDateTime &departureTime, const QDateTime &arrivalTime, const qint16 &departureDelay, const qint16 &arrivalDelay, const QUrl &tripURI, const QUrl &routeURI, const QString &direction, QObject *parent)
+LinkedConnectionFragment::LinkedConnectionFragment(
+        const QUrl &uri, const QUrl &departureStationURI,
+        const QUrl &arrivalStationURI,
+        const QDateTime &departureTime,
+        const QDateTime &arrivalTime,
+        const qint16 &departureDelay,
+        const qint16 &arrivalDelay,
+        const QUrl &tripURI,
+        const QUrl &routeURI,
+        const QString &direction,
+        QObject *parent
+        )
 {
     // Set parent of this QObject. When parent is destroyed, this one is automatically cleaned up too.
     this->setParent(parent);

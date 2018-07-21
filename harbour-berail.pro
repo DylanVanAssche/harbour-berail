@@ -89,7 +89,10 @@ HEADERS += \
     src/network/httpmanager.h \
     tests/httpmanagertest.h \
     tests/databasemanagertest.h \
-    src/linkedconnections/linkedconnectionfragment.h
+    src/linkedconnections/linkedconnectionfragment.h \
+    tests/linkedconnectionfragmenttest.h \
+    src/linkedconnections/linkedconnectionsfactory.h \
+    tests/linkedconnectionsfactorytest.h
 
 SOURCES += src/harbour-berail.cpp \
     src/logger.cpp \
@@ -98,7 +101,10 @@ SOURCES += src/harbour-berail.cpp \
     src/network/httpmanager.cpp \
     tests/httpmanagertest.cpp \
     tests/databasemanagertest.cpp \
-    src/linkedconnections/linkedconnectionfragment.cpp
+    src/linkedconnections/linkedconnectionfragment.cpp \
+    tests/linkedconnectionfragmenttest.cpp \
+    src/linkedconnections/linkedconnectionsfactory.cpp \
+    tests/linkedconnectionsfactorytest.cpp
 
 OTHER_FILES += qml/harbour-berail.qml \
     qml/cover/CoverPage.qml \

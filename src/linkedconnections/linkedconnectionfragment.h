@@ -20,7 +20,11 @@
 #ifndef LINKEDCONNECTIONFRAGMENT_H
 #define LINKEDCONNECTIONFRAGMENT_H
 
-#include <QObject>
+#include <QtCore/QtGlobal>
+#include <QtCore/QObject>
+#include <QtCore/QUrl>
+#include <QtCore/QDateTime>
+#include <QtCore/QString>
 
 class LinkedConnectionFragment : public QObject
 {

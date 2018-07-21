@@ -20,24 +20,28 @@
 #ifndef HTTPMANAGER_H
 #define HTTPMANAGER_H
 
-#include <QObject>
+#include <QtCore/QObject>
+#include <QtCore/QString>
+#include <QtCore/QList>
 #include <QtCore/QUrl>
 #include <QtCore/QUrlQuery>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkConfigurationManager>
+#include <QtNetwork/QSslError>
 
+// Singleton pattern
 class HTTPManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit HTTPManager(QObject *parent = nullptr);
+    static HTTPManager *getInstance(QObject *parent = nullptr);
     QString userAgent() const;
     void setUserAgent(const QString &userAgent);
     QString acceptHeader() const;
     void setAcceptHeader(const QString &acceptHeader);
-    void getResource(const QUrl &url, const QUrlQuery &parameters = nullptr);
+    void getResource(const QUrl &url);
     void postResource(const QUrl &url, const QByteArray &data);
     void deleteResource(const QUrl &url);
     void headResource(const QUrl &url);
@@ -50,10 +54,16 @@ signals:
     void acceptHeaderChanged();
 
 private:
-    QNetworkRequest prepareRequest(const QUrl &url);
-    QNetworkAccessManager *QNAM;
+    QNetworkAccessManager *m_QNAM;
     QString m_userAgent;
     QString m_acceptHeader;
+    static HTTPManager *m_instance; // error: ‘constexpr’ needed for in-class initialization of static data member ‘tolerance’ of non-integral type
+    explicit HTTPManager(QObject *parent);
+    QNetworkRequest prepareRequest(const QUrl &url);
+    QNetworkAccessManager *QNAM() const;
+    void setQNAM(QNetworkAccessManager *value);
+    static HTTPManager *manager();
+    static void setManager(const HTTPManager *manager);
 };
 
 #endif // HTTPMANAGER_H
