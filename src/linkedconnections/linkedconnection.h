@@ -27,6 +27,19 @@ class LinkedConnection : public QObject
     Q_OBJECT
 public:
     explicit LinkedConnection(QObject *parent = nullptr);
+    explicit LinkedConnection(
+            const QUrl &uri,
+            const QUrl &departureStationURI,
+            const QUrl &arrivalStationURI,
+            const QDateTime &departureTime,
+            const QDateTime &arrivalTime,
+            const qint16 &departureDelay,
+            const qint16 &arrivalDelay,
+            const QUrl &tripURI,
+            const QUrl &routeURI,
+            const QString &direction,
+            QObject *parent = nullptr
+            );
     QUrl uri() const;
     void setURI(const QUrl &uri);
     QUrl departureStationURI() const;
@@ -49,6 +62,16 @@ public:
     void setDirection(const QString &direction);
 
 signals:
+    void uriChanged();
+    void departureStationURIChanged();
+    void arrivalStationURIChanged();
+    void departureTimeChanged();
+    void arrivalTimeChanged();
+    void departureDelayChanged();
+    void arrivalDelayChanged();
+    void tripURIChanged();
+    void routeURIChanged();
+    void directionChanged();
 
 private:
     QUrl m_uri;
@@ -61,7 +84,7 @@ private:
     QUrl m_tripURI;
     QUrl m_routeURI;
     QString m_direction;
-    // pickUp and dropOff types as enums could be added later if needed
+    // pickUp and dropOff types as enums could be added later
 };
 
 #endif // LINKEDCONNECTION_H
