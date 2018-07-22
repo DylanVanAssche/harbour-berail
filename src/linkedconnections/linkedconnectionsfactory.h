@@ -21,9 +21,14 @@
 #define LINKEDCONNECTIONSFACTORY_H
 
 #include <QtCore/QObject>
+#include <QtCore/QJsonDocument>
+#include <QtCore/QJsonParseError>
+#include <QtCore/QJsonObject>
+#include <QtCore/QJsonArray>
 #include "linkedconnectionfragment.h"
 #include "../network/httpmanager.h"
 #include "../database/databasemanager.h"
+#define BASE_URL "https://graph.irail.be/sncb/connections?departureTime="
 
 // Factory pattern to generate Linked Connections fragments on the fly
 class LinkedConnectionsFactory: public QObject
@@ -31,16 +36,25 @@ class LinkedConnectionsFactory: public QObject
     Q_OBJECT
 public:
     static LinkedConnectionsFactory *getInstance(const QString &path, QObject *parent = nullptr);
-    LinkedConnectionFragment *getFragment(const QUrl &uri);
+    //void getFragment(const QUrl &uri);
+    void getPage(const QUrl &uri);
+
+signals:
+    void fragmentsReady(const QList<LinkedConnectionFragment *> &fragments);
+
+private slots:
+    void processHTTPReply(QNetworkReply *reply);
 
 private:
     static LinkedConnectionsFactory *m_instance;
     HTTPManager *m_http;
     DatabaseManager *m_db;
-    LinkedConnectionFragment *getFragmentFromDatabaseManager(const QUrl &uri);
-    void getFragmentFromHTTPManager(const QUrl &uri);
+    LinkedConnectionFragment *getFragmentByURIFromDatabaseManager(const QUrl &uri);
+    LinkedConnectionFragment *getFragmentByPageFromDatabaseManager(const QUrl &uri);
+    QList<LinkedConnectionFragment *> getPageByURIFromDatabaseManager(const QUrl &uri);
+    void getPageByURIFromHTTPManager(const QUrl &uri);
     void initDatabase();
-    explicit LinkedConnectionsFactory(QObject *parent);
+    explicit LinkedConnectionsFactory(const QString &path, QObject *parent);
     HTTPManager *http() const;
     void setHttp(HTTPManager *http);
     DatabaseManager *db() const;

@@ -85,5 +85,6 @@ int main(int argc, char *argv[])
     LinkedConnectionFragmentTest testSuiteLCFragment;
     LinkedConnectionsFactoryTest testSuiteLCFactory;
     QCoreApplication app(argc, argv); // Allow QEventLoops
-    return QTest::qExec(&testSuiteHTTP, argc, argv) | QTest::qExec(&testSuiteDB, argc, argv) | QTest::qExec(&testSuiteLCFragment, argc, argv) | QTest::qExec(&testSuiteLCFactory, argc, argv) | app.exec();
+    return QTest::qExec(&testSuiteLCFactory, argc, argv) | app.exec();
+    //return QTest::qExec(&testSuiteHTTP, argc, argv) | QTest::qExec(&testSuiteDB, argc, argv) | QTest::qExec(&testSuiteLCFragment, argc, argv) | QTest::qExec(&testSuiteLCFactory, argc, argv) | app.exec();
 }

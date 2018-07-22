@@ -40,6 +40,8 @@ class DatabaseManager : public QObject
 public:
     static DatabaseManager *getInstance(QString path, QObject *parent = nullptr);
     bool execute(QSqlQuery query);
+    bool startTransaction();
+    bool endTransaction();
     QSqlDatabase database() const;
 
 private:

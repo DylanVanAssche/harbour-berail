@@ -90,9 +90,19 @@ bool DatabaseManager::execute(QSqlQuery query)
         return true;
     }
     else {
-        qCritical() << "Executing querry FAILED:" << query.lastError().text();
+        qCritical() << "Executing querry:" << query.executedQuery() << "FAILED:" << query.lastError().text();
         return false;
     }
+}
+
+bool DatabaseManager::startTransaction()
+{
+    return this->database().transaction();
+}
+
+bool DatabaseManager::endTransaction()
+{
+    return this->database().commit();
 }
 
 /**
