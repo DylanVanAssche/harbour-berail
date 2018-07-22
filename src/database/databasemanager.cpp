@@ -86,7 +86,7 @@ DatabaseManager *DatabaseManager::getInstance(QString path, QObject *parent)
 bool DatabaseManager::execute(QSqlQuery query)
 {
     if(this->database().isOpen() && query.exec()) {
-        qDebug() << "Executing querry OK:" << query.executedQuery();
+        //qDebug() << "Executing querry OK:" << query.executedQuery();
         return true;
     }
     else {

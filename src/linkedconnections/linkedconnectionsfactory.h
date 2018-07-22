@@ -49,11 +49,13 @@ private:
     static LinkedConnectionsFactory *m_instance;
     HTTPManager *m_http;
     DatabaseManager *m_db;
-    LinkedConnectionFragment *getFragmentByURIFromDatabaseManager(const QUrl &uri);
-    LinkedConnectionFragment *getFragmentByPageFromDatabaseManager(const QUrl &uri);
     QList<LinkedConnectionFragment *> getPageByURIFromDatabaseManager(const QUrl &uri);
     void getPageByURIFromHTTPManager(const QUrl &uri);
     void initDatabase();
+    bool isPageInDatabase(const QUrl &uri);
+    bool addPageToDatabase(const QString &uri, const qint64 &timestamp, const QString &hydraNext, const QString &hydraPrevious);
+    bool addFragmentToDatabase(const QString &pageURI, LinkedConnectionFragment *fragment);
+    LinkedConnectionFragment *generateFragmentFromJSON(const QJsonObject &connection);
     explicit LinkedConnectionsFactory(const QString &path, QObject *parent);
     HTTPManager *http() const;
     void setHttp(HTTPManager *http);

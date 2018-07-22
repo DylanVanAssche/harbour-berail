@@ -14,7 +14,13 @@ void LinkedConnectionsFactoryTest::runLinkedConnectionsFactory()
 
     // Linked Connections page should be loaded from the SQLite DB (if this test already ran once)
     factory->getPage(QUrl("https://graph.irail.be/sncb/connections?departureTime=2018-07-21T07:29:00.000Z"));
-    QVERIFY(spy.wait() || spy.count() > 0); // seems to be a bug in QSignalSpy, sometimes wait() triggers and sometimes count() > 0
+    QVERIFY(spy.wait() || spy.count() > 0); // spy.wait() won't work for sync code
+
+    factory->getPage(QUrl("https://graph.irail.be/sncb/connections?departureTime=2018-07-21T08:14:00.000Z"));
+    QVERIFY(spy.wait() || spy.count() > 0); // spy.wait() won't work for sync code
+
+    factory->getPage(QUrl("https://graph.irail.be/sncb/connections?departureTime=2018-07-21T06:45:00.000Z"));
+    QVERIFY(spy.wait() || spy.count() > 0); // spy.wait() won't work for sync code TODO
 
     // Linked Connections page should be loaded from the Linked Connections API (if it's a new page)
     factory->getPage(QUrl("https://graph.irail.be/sncb/connections?departureTime=" + QDateTime::currentDateTime().toString(Qt::ISODate)));
