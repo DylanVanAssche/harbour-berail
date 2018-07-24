@@ -54,7 +54,7 @@ void LinkedConnectionsFactory::getPage(const QUrl &uri)
         this->getPageByURIFromHTTPManager(uri);
     }
     else {
-        qDebug() << "Emitting fragmentsReady signal since page cached by DB";
+        qDebug() << "Page is available in database";
         emit fragmentsReady(fragments);
     }
 }
@@ -64,7 +64,6 @@ QList<LinkedConnectionFragment *> LinkedConnectionsFactory::getPageByURIFromData
 {
     QSqlQuery query(this->db()->database());
     QList<LinkedConnectionFragment *> fragments;
-    qDebug() << "Is PAGE IN DB>" << this->isPageInDatabase(uri);
     if(this->isPageInDatabase(uri)) {
         // Finding fragments from the page
         query.prepare("SELECT "
@@ -128,16 +127,17 @@ void LinkedConnectionsFactory::initDatabase()
 
     // PAGES table
     bool succes = query.prepare("CREATE TABLE IF NOT EXISTS pages ("
-                                "uri TEXT PRIMARY KEY, "
+                                "uri TEXT PRIMARY KEY ON CONFLICT IGNORE, "
                                 "timestamp INT, " // Sorting using UNIX timestamp is much faster then DATE based according to the SQLite docs.
                                 "hydraNext TEXT, "
-                                "hydraPrevious TEXT)");
+                                "hydraPrevious TEXT,"
+                                "UNIQUE(uri, timestamp))");
     succes = this->db()->execute(query);
     query.clear(); // Release resources for reuse
 
     // FRAGMENTS table
     succes = query.prepare("CREATE TABLE IF NOT EXISTS fragments ("
-                           "uri TEXT PRIMARY KEY, "
+                           "uri TEXT PRIMARY KEY ON CONFLICT IGNORE, "
                            "page TEXT, "
                            "departureStationURI TEXT, "
                            "arrivalStationURI TEXT, "
@@ -147,7 +147,8 @@ void LinkedConnectionsFactory::initDatabase()
                            "arrivalDELAY INT, "
                            "tripURI TEXT, "
                            "routeURI TEXT, "
-                           "direction TEXT)");
+                           "direction TEXT, "
+                           "UNIQUE(uri, direction))");
     succes = this->db()->execute(query);
 
     if(succes)
@@ -173,7 +174,7 @@ bool LinkedConnectionsFactory::isPageInDatabase(const QUrl &uri)
 bool LinkedConnectionsFactory::addPageToDatabase(const QString &uri, const qint64 &timestamp, const QString &hydraNext, const QString &hydraPrevious)
 {
     QSqlQuery query(this->db()->database());
-    query.prepare("INSERT INTO "
+    query.prepare("INSERT OR IGNORE INTO "
                   "pages(uri, timestamp, hydraNext, hydraPrevious) "
                   "VALUES(:uri, :timestamp, :hydraNext, :hydraPrevious)");
     query.bindValue(":uri", uri);
@@ -186,7 +187,7 @@ bool LinkedConnectionsFactory::addPageToDatabase(const QString &uri, const qint6
 bool LinkedConnectionsFactory::addFragmentToDatabase(const QString &pageURI, LinkedConnectionFragment *fragment)
 {
     QSqlQuery query(this->db()->database());
-    query.prepare("INSERT INTO fragments ("
+    query.prepare("INSERT OR IGNORE INTO fragments ("
                   "uri, "
                   "page, "
                   "departureStationURI, "
@@ -223,7 +224,7 @@ bool LinkedConnectionsFactory::addFragmentToDatabase(const QString &pageURI, Lin
     return this->db()->execute(query);
 }
 
-LinkedConnectionFragment *LinkedConnectionsFactory::generateLCFragmentFromJSON(const QJsonObject &connection)
+LinkedConnectionFragment *LinkedConnectionsFactory::generateFragmentFromJSON(const QJsonObject &connection)
 {
     QUrl uri = QUrl(connection["@id"].toString());
     QUrl departureStationURI = QUrl(connection["departureStop"].toString());
@@ -296,17 +297,24 @@ void LinkedConnectionsFactory::processHTTPReply(QNetworkReply *reply)
                     // Linked Connections page
                     // Save page in DB
                     QString pageURI = jsonObject["@id"].toString();
-                    qint64 pageTimestamp = (QDateTime::fromString(pageURI.right(24), Qt::ISODate)).toMSecsSinceEpoch(); // TODO regex
+                    QDateTime pageTimestamp = QDateTime::fromString(pageURI.right(24), Qt::ISODate); // TO DO REGEX
                     QString hydraNext = jsonObject["hydra:next"].toString();
                     QString hydraPrevious = jsonObject["hydra:previous"].toString();
-                    this->addPageToDatabase(pageURI, pageTimestamp, hydraNext, hydraPrevious);
+                    this->addPageToDatabase(pageURI, pageTimestamp.toMSecsSinceEpoch(), hydraNext, hydraPrevious);
+                    LinkedConnectionPage *page = new LinkedConnectionPage(
+                                pageURI,
+                                pageTimestamp,
+                                hydraNext,
+                                hydraPrevious
+                                );
+                    emit this->pageReady(page);
 
                     // Linked Connections fragments
                     QJsonArray graph = jsonObject["@graph"].toArray();
 
                     foreach(QJsonValue item, graph) {
                         QJsonObject connection = item.toObject();
-                        LinkedConnectionFragment *frag = this->generateLCFragmentFromJSON(connection);
+                        LinkedConnectionFragment *frag = this->generateFragmentFromJSON(connection);
                         this->addFragmentToDatabase(pageURI, frag);
                         fragments.append(frag);
                     }

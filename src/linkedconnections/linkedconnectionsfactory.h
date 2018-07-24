@@ -26,6 +26,7 @@
 #include <QtCore/QJsonObject>
 #include <QtCore/QJsonArray>
 #include "linkedconnectionfragment.h"
+#include "linkedconnectionpage.h"
 #include "../network/httpmanager.h"
 #include "../database/databasemanager.h"
 #define BASE_URL "https://graph.irail.be/sncb/connections?departureTime="
@@ -36,11 +37,11 @@ class LinkedConnectionsFactory: public QObject
     Q_OBJECT
 public:
     static LinkedConnectionsFactory *getInstance(const QString &path, QObject *parent = nullptr);
-    //void getFragment(const QUrl &uri);
     void getPage(const QUrl &uri);
 
 signals:
     void fragmentsReady(const QList<LinkedConnectionFragment *> &fragments);
+    void pageReady(const LinkedConnectionPage *page);
 
 private slots:
     void processHTTPReply(QNetworkReply *reply);

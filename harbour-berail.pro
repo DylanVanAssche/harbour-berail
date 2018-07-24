@@ -92,7 +92,9 @@ HEADERS += \
     src/linkedconnections/linkedconnectionfragment.h \
     tests/linkedconnectionfragmenttest.h \
     src/linkedconnections/linkedconnectionsfactory.h \
-    tests/linkedconnectionsfactorytest.h
+    tests/linkedconnectionsfactorytest.h \
+    src/linkedconnections/linkedconnectionpage.h \
+    tests/linkedconnectionpagetest.h
 
 SOURCES += src/harbour-berail.cpp \
     src/logger.cpp \
@@ -104,7 +106,9 @@ SOURCES += src/harbour-berail.cpp \
     src/linkedconnections/linkedconnectionfragment.cpp \
     tests/linkedconnectionfragmenttest.cpp \
     src/linkedconnections/linkedconnectionsfactory.cpp \
-    tests/linkedconnectionsfactorytest.cpp
+    tests/linkedconnectionsfactorytest.cpp \
+    src/linkedconnections/linkedconnectionpage.cpp \
+    tests/linkedconnectionpagetest.cpp
 
 OTHER_FILES += qml/harbour-berail.qml \
     qml/cover/CoverPage.qml \

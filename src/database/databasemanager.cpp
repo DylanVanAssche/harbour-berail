@@ -32,7 +32,7 @@ DatabaseManager* DatabaseManager::m_instance = nullptr;
  * The DatabaseManager facade makes database access in Qt abstract from the underlying database (SQLite, MySQL, ORACLE, ...).
  * Any errors during initialisation of the database are catched and logged as CRITICAL.
  */
-DatabaseManager::DatabaseManager(QString path, QObject *parent)
+DatabaseManager::DatabaseManager(const QString &path, QObject *parent)
 {
     // Set parent of this QObject. When parent is destroyed, this one is automatically cleaned up too.
     this->setParent(parent);
@@ -61,7 +61,7 @@ DatabaseManager::DatabaseManager(QString path, QObject *parent)
  * @public
  * Gets a DatabaseManager instance using the Singleton pattern.
  */
-DatabaseManager *DatabaseManager::getInstance(QString path, QObject *parent)
+DatabaseManager *DatabaseManager::getInstance(const QString &path, QObject *parent)
 {
     // NICE-TO-HAVE: Allow access to multiple databases by checking the path of the database
     if(m_instance == nullptr) {
@@ -83,7 +83,7 @@ DatabaseManager *DatabaseManager::getInstance(QString path, QObject *parent)
  * Before the execution takes place, the connection is checked.
  * During the execution, the errors are catched and logged as CRITICAL.
  */
-bool DatabaseManager::execute(QSqlQuery query)
+bool DatabaseManager::execute(QSqlQuery &query)
 {
     if(this->database().isOpen() && query.exec()) {
         //qDebug() << "Executing querry OK:" << query.executedQuery();

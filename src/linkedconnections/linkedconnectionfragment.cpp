@@ -89,10 +89,10 @@ LinkedConnectionFragment::LinkedConnectionFragment(
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Gets the URI of the linked connection
+ * @brief Gets the URI of the linked connection fragment
  * @return QUrl URI
  * @public
- * Retrieves the URI of the linked connection and returns it.
+ * Retrieves the URI of the linked connection fragment  and returns it.
  */
 QUrl LinkedConnectionFragment::uri() const
 {
@@ -103,10 +103,10 @@ QUrl LinkedConnectionFragment::uri() const
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Sets the URI of the linked connection
+ * @brief Sets the URI of the linked connection fragment
  * @param const QUrl &URI
  * @public
- * Sets the URI of the linked connection to the given QUrl &uri.
+ * Sets the URI of the linked connection fragment to the given QUrl &uri.
  * Emits the uriChanged signal.
  */
 void LinkedConnectionFragment::setURI(const QUrl &uri)
@@ -119,10 +119,10 @@ void LinkedConnectionFragment::setURI(const QUrl &uri)
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Gets the departure station URI of the linked connection
+ * @brief Gets the departure station URI of the linked connection fragment
  * @return QUrl departureStationURI
  * @public
- * Retrieves the departure station URI of the linked connection and returns it.
+ * Retrieves the departure station URI of the linked connection fragment and returns it.
  */
 QUrl LinkedConnectionFragment::departureStationURI() const
 {
@@ -133,10 +133,10 @@ QUrl LinkedConnectionFragment::departureStationURI() const
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Sets the departure station URI of the linked connection
+ * @brief Sets the departure station URI of the linked connection fragment
  * @param const QUrl &departureStationURI
  * @public
- * Sets the departure station URI of the linked connection to the given QUrl &departureStationURI.
+ * Sets the departure station URI of the linked connection fragment to the given QUrl &departureStationURI.
  * Emits the departureStationURIChanged signal.
  */
 void LinkedConnectionFragment::setDepartureStationURI(const QUrl &departureStationURI)
@@ -149,10 +149,10 @@ void LinkedConnectionFragment::setDepartureStationURI(const QUrl &departureStati
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Gets the arrival station URI of the linked connection
+ * @brief Gets the arrival station URI of the linked connection fragment
  * @return QUrl arrivalStationURI
  * @public
- * Retrieves the arrival station URI of the linked connection and returns it.
+ * Retrieves the arrival station URI of the linked connection fragment and returns it.
  */
 QUrl LinkedConnectionFragment::arrivalStationURI() const
 {
@@ -163,10 +163,10 @@ QUrl LinkedConnectionFragment::arrivalStationURI() const
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Sets the arrival station URI of the linked connection
+ * @brief Sets the arrival station URI of the linked connection fragment
  * @param const QUrl &arrivalStationURI
  * @public
- * Sets the arrival station URI of the linked connection to the given QUrl &arrivalStationURI.
+ * Sets the arrival station URI of the linked connection fragment to the given QUrl &arrivalStationURI.
  * Emits the arrivalStationURIChanged signal.
  */
 void LinkedConnectionFragment::setArrivalStationURI(const QUrl &arrivalStationURI)
@@ -179,10 +179,10 @@ void LinkedConnectionFragment::setArrivalStationURI(const QUrl &arrivalStationUR
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Gets the departure time of the linked connection
+ * @brief Gets the departure time of the linked connection fragment
  * @return QDateTime departureTime
  * @public
- * Retrieves the departure time of the linked connection and returns it.
+ * Retrieves the departure time of the linked connection fragment and returns it.
  */
 QDateTime LinkedConnectionFragment::departureTime() const
 {
@@ -193,10 +193,10 @@ QDateTime LinkedConnectionFragment::departureTime() const
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Sets the departure time of the linked connection
+ * @brief Sets the departure time of the linked connection fragment
  * @param const QDateTime &departureTime
  * @public
- * Sets the departure time of the linked connection to the given QDateTime &departureTime.
+ * Sets the departure time of the linked connection fragment to the given QDateTime &departureTime.
  * Emits the departureTimeChanged signal.
  */
 void LinkedConnectionFragment::setDepartureTime(const QDateTime &departureTime)
@@ -209,10 +209,10 @@ void LinkedConnectionFragment::setDepartureTime(const QDateTime &departureTime)
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Gets the arrival time of the linked connection
+ * @brief Gets the arrival time of the linked connection fragment
  * @return QDateTime arrivalTime
  * @public
- * Retrieves the arrival time of the linked connection and returns it.
+ * Retrieves the arrival time of the linked connection fragment and returns it.
  */
 QDateTime LinkedConnectionFragment::arrivalTime() const
 {
@@ -223,10 +223,10 @@ QDateTime LinkedConnectionFragment::arrivalTime() const
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Sets the arrival time of the linked connection
+ * @brief Sets the arrival time of the linked connection fragment
  * @param const QDateTime &arrivalTime
  * @public
- * Sets the arrival time of the linked connection to the given QDateTime &arrivalTime.
+ * Sets the arrival time of the linked connection fragment to the given QDateTime &arrivalTime.
  * Emits the arrivalTimeChanged signal.
  */
 void LinkedConnectionFragment::setArrivalTime(const QDateTime &arrivalTime)
@@ -239,10 +239,10 @@ void LinkedConnectionFragment::setArrivalTime(const QDateTime &arrivalTime)
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Gets the departure delay of the linked connection
+ * @brief Gets the departure delay of the linked connection fragment
  * @return QDateTime departureDelay
  * @public
- * Retrieves the departure delay of the linked connection and returns it.
+ * Retrieves the departure delay of the linked connection fragment and returns it.
  */
 qint16 LinkedConnectionFragment::departureDelay() const
 {
@@ -253,10 +253,10 @@ qint16 LinkedConnectionFragment::departureDelay() const
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Sets the departure delay of the linked connection
+ * @brief Sets the departure delay of the linked connection fragment
  * @param const QDateTime &departureDelay
  * @public
- * Sets the departure delay of the linked connection to the given qint16 &departureDelay.
+ * Sets the departure delay of the linked connection fragment to the given qint16 &departureDelay.
  * Emits the departureDelayChanged signal.
  */
 void LinkedConnectionFragment::setDepartureDelay(const qint16 &departureDelay)
@@ -269,10 +269,10 @@ void LinkedConnectionFragment::setDepartureDelay(const qint16 &departureDelay)
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Gets the arrival delay of the linked connection
+ * @brief Gets the arrival delay of the linked connection fragment
  * @return QDateTime arrivalDelay
  * @public
- * Retrieves the arrival delay of the linked connection and returns it.
+ * Retrieves the arrival delay of the linked connection fragment and returns it.
  */
 qint16 LinkedConnectionFragment::arrivalDelay() const
 {
@@ -283,10 +283,10 @@ qint16 LinkedConnectionFragment::arrivalDelay() const
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Sets the arrival delay of the linked connection
+ * @brief Sets the arrival delay of the linked connection fragment
  * @param const QDateTime &arrival
  * @public
- * Sets the arrival delay of the linked connection to the given qint16 &arrivalDelay.
+ * Sets the arrival delay of the linked connection fragment to the given qint16 &arrivalDelay.
  * Emits the arrivalDelayChanged signal.
  */
 void LinkedConnectionFragment::setArrivalDelay(const qint16 &arrivalDelay)
@@ -299,10 +299,10 @@ void LinkedConnectionFragment::setArrivalDelay(const qint16 &arrivalDelay)
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Gets the trip URI of the linked connection
+ * @brief Gets the trip URI of the linked connection fragment
  * @return QUrl tripURI
  * @public
- * Retrieves the trip URI of the linked connection and returns it.
+ * Retrieves the trip URI of the linked connection fragment and returns it.
  */
 QUrl LinkedConnectionFragment::tripURI() const
 {
@@ -313,10 +313,10 @@ QUrl LinkedConnectionFragment::tripURI() const
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Sets the trip URI of the linked connection
+ * @brief Sets the trip URI of the linked connection fragment
  * @param const QUrl &tripURI
  * @public
- * Sets the trip URI of the linked connection to the given QUrl &tripURI.
+ * Sets the trip URI of the linked connection fragment to the given QUrl &tripURI.
  * Emits the tripURIChanged signal.
  */
 void LinkedConnectionFragment::setTripURI(const QUrl &tripURI)
@@ -329,10 +329,10 @@ void LinkedConnectionFragment::setTripURI(const QUrl &tripURI)
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Gets the route URI of the linked connection
+ * @brief Gets the route URI of the linked connection fragment
  * @return QUrl routeURI
  * @public
- * Retrieves the route URI of the linked connection and returns it.
+ * Retrieves the route URI of the linked connection fragment and returns it.
  */
 QUrl LinkedConnectionFragment::routeURI() const
 {
@@ -343,10 +343,10 @@ QUrl LinkedConnectionFragment::routeURI() const
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Sets the route URI of the linked connection
+ * @brief Sets the route URI of the linked connection fragment
  * @param const QUrl &routeURI
  * @public
- * Sets the route URI of the linked connection to the given QUrl &routeURI.
+ * Sets the route URI of the linked connection fragment to the given QUrl &routeURI.
  * Emits the routeURIChanged signal.
  */
 void LinkedConnectionFragment::setRouteURI(const QUrl &routeURI)
@@ -359,10 +359,10 @@ void LinkedConnectionFragment::setRouteURI(const QUrl &routeURI)
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Gets the direction of the linked connection
+ * @brief Gets the direction of the linked connection fragment
  * @return QString direction
  * @public
- * Retrieves the direction of the vehicle in this linked connection and returns it.
+ * Retrieves the direction of the vehicle in this linked connection fragment and returns it.
  */
 QString LinkedConnectionFragment::direction() const
 {
@@ -373,10 +373,10 @@ QString LinkedConnectionFragment::direction() const
  * @file linkedconnectionfragment.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Sets the direction of the linked connection
+ * @brief Sets the direction of the linked connection fragment
  * @param const QString &direction
  * @public
- * Sets the direction of the vehicle in this linked connection to the given QString &direction.
+ * Sets the direction of the vehicle in this linked connection fragment to the given QString &direction.
  * Emits the directionChanged signal.
  */
 void LinkedConnectionFragment::setDirection(const QString &direction)

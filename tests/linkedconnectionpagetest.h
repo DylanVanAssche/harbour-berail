@@ -17,38 +17,24 @@
  *   License along with BeRail.  If not, see <http://www.gnu.org/licenses/>.  *
  ******************************************************************************/
 
-#ifndef DATABASEMANAGER_H
-#define DATABASEMANAGER_H
+#ifndef LINKEDCONNECTIONPAGETEST_H
+#define LINKEDCONNECTIONPAGETEST_H
 
-#include <QtCore/QtGlobal>
-#include <QtCore/QtDebug>
-#include <QtCore/QObject>
-#include <QtCore/QString>
-#include <QtCore/QDir>
-#include <QtSql/QSqlDatabase>
-#include <QtSql/QSqlDriver>
-#include <QtSql/QSqlError>
-#include <QtSql/QSqlQuery>
+#include <QObject>
+#include <QtTest/QtTest>
+#include <QSignalSpy>
+#include "../src/linkedconnections/linkedconnectionpage.h"
 
-// Select here the right DB driver for Qt
-#define DRIVER "QSQLITE"
-
-// Singleton pattern
-class DatabaseManager : public QObject
+class LinkedConnectionPageTest: public QObject
 {
     Q_OBJECT
-public:
-    static DatabaseManager *getInstance(const QString &path, QObject *parent = nullptr);
-    bool execute(QSqlQuery &query);
-    bool startTransaction();
-    bool endTransaction();
-    QSqlDatabase database() const;
+private slots:
+    void initLinkedConnectionPageTest();
+    void runLinkedConnectionPageTest();
+    void cleanLinkedConnectionPageTest();
 
 private:
-    QSqlDatabase m_database;
-    explicit DatabaseManager(const QString &path, QObject *parent);
-    static DatabaseManager *m_instance;
-    void setDatabase(const QSqlDatabase &database);
+    LinkedConnectionPage *page;
 };
 
-#endif // DATABASEMANAGER_H
+#endif // LINKEDCONNECTIONPAGETEST_H

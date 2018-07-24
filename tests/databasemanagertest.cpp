@@ -18,10 +18,11 @@
  ******************************************************************************/
 
 #include "databasemanagertest.h"
+#define DB_PATH "/home/nemo/.local/share/harbour-berail/db/lc-tests.db"
 
 void DatabaseManagerTest::initDatabaseManager()
 {
-    db = DatabaseManager::getInstance("/home/nemo/.local/share/harbour-berail/db/tests.db");
+    db = DatabaseManager::getInstance(DB_PATH);
 }
 
 void DatabaseManagerTest::runDatabaseManager()

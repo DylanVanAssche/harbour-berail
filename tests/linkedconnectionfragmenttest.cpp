@@ -60,7 +60,6 @@
 
 void LinkedConnectionFragmentTest::initLinkedConnectionFragment()
 {
-    qDebug() << "Init tests for Linked Connection fragments";
     lcWithoutDelay = new LinkedConnectionFragment(this);
     lcWithDelay = new LinkedConnectionFragment(
                 QUrl("http://irail.be/connections/8814001/20180721/IC3309"),
@@ -79,8 +78,6 @@ void LinkedConnectionFragmentTest::initLinkedConnectionFragment()
 
 void LinkedConnectionFragmentTest::runLinkedConnectionFragment()
 {
-    qDebug() << "Running tests on Linked Connection fragments";
-
     // Set each property and check if the signal of the property fires
     QSignalSpy spyUriChanged(lcWithoutDelay, SIGNAL(uriChanged()));
     lcWithoutDelay->setURI(QUrl("http://irail.be/connections/8822004/20180721/IC3108"));
@@ -125,7 +122,6 @@ void LinkedConnectionFragmentTest::runLinkedConnectionFragment()
 
 void LinkedConnectionFragmentTest::cleanLinkedConnectionFragment()
 {
-    qDebug() << "Cleaning up Linked Connection fragments";
     lcWithoutDelay->deleteLater();
     lcWithDelay->deleteLater();
 }
