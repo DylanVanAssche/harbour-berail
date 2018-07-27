@@ -26,6 +26,7 @@ void LinkedConnectionPageTest::initLinkedConnectionPageTest()
                 QDateTime::fromString("2018-07-24T17:59:00.000Z", Qt::ISODate),
                 QUrl("https://graph.irail.be/sncb/connections?departureTime=2018-07-24T16:29:00.000Z"),
                 QUrl("https://graph.irail.be/sncb/connections?departureTime=2018-07-24T19:34:00.000Z"),
+                QList<LinkedConnectionFragment *>(),
                 this
                 );
 }

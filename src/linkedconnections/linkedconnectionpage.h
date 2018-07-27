@@ -23,6 +23,8 @@
 #include <QtCore/QObject>
 #include <QtCore/QUrl>
 #include <QtCore/QDateTime>
+#include <QtCore/QList>
+#include "linkedconnectionfragment.h"
 
 class LinkedConnectionPage : public QObject
 {
@@ -34,6 +36,7 @@ public:
             const QDateTime &timestamp,
             const QUrl &hydraNext,
             const QUrl &hydraPrevious,
+            const QList<LinkedConnectionFragment *> &fragments,
             QObject *parent = nullptr
             );
     QUrl uri() const;
@@ -44,18 +47,22 @@ public:
     void setHydraNext(const QUrl &hydraNext);
     QUrl hydraPrevious() const;
     void setHydraPrevious(const QUrl &hydraPrevious);
+    QList<LinkedConnectionFragment *> fragments() const;
+    void setFragments(const QList<LinkedConnectionFragment *> &fragments);
 
 signals:
     void uriChanged();
     void timestampChanged();
     void hydraNextChanged();
     void hydraPreviousChanged();
+    void fragmentsChanged();
 
 private:
     QUrl m_uri;
     QDateTime m_timestamp;
     QUrl m_hydraNext;
     QUrl m_hydraPrevious;
+    QList<LinkedConnectionFragment *> m_fragments;
 };
 
 #endif // LINKEDCONNECTIONPAGE_H
