@@ -31,6 +31,9 @@
 #include <QtTest>
 #include "../tests/httpmanagertest.h"
 #include "../tests/databasemanagertest.h"
+#include "../tests/linkedconnectionfragmenttest.h"
+#include "../tests/linkedconnectionpagetest.h"
+#include "../tests/linkedconnectionsfactorytest.h"
 
 // Add toString() method to all custom method
 
@@ -80,6 +83,9 @@ int main(int argc, char *argv[])
     return app->exec();*/
     HTTPManagerTest testSuiteHTTP;
     DatabaseManagerTest testSuiteDB;
-    QCoreApplication app(argc, argv); // Allow QEventLoops
-    return QTest::qExec(&testSuiteHTTP, argc, argv) | QTest::qExec(&testSuiteDB, argc, argv) | app.exec();
+    LinkedConnectionFragmentTest testSuiteLCFragment;
+    LinkedConnectionPageTest testSuiteLCPage;
+    LinkedConnectionsFactoryTest testSuiteLCFactory;
+    QCoreApplication app(argc, argv); // Allow QEventLoops for QSignalSpy
+    return QTest::qExec(&testSuiteHTTP, argc, argv) | QTest::qExec(&testSuiteDB, argc, argv) | QTest::qExec(&testSuiteLCFragment, argc, argv) | QTest::qExec(&testSuiteLCPage, argc, argv) | QTest::qExec(&testSuiteLCFactory, argc, argv) | app.exec();
 }

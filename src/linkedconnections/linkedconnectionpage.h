@@ -17,29 +17,45 @@
  *   License along with BeRail.  If not, see <http://www.gnu.org/licenses/>.  *
  ******************************************************************************/
 
-#ifndef HTTPMANAGERTEST_H
-#define HTTPMANAGERTEST_H
+#ifndef LINKEDCONNECTIONPAGE_H
+#define LINKEDCONNECTIONPAGE_H
 
-#include <QObject>
-#include <QtTest/QtTest>
-#include <QSignalSpy>
-#include "../src/network/httpmanager.h"
+#include <QtCore/QObject>
+#include <QtCore/QUrl>
+#include <QtCore/QDateTime>
 
-#define SIGNAL_WAIT_TIME 3000
-
-class HTTPManagerTest : public QObject
+class LinkedConnectionPage : public QObject
 {
     Q_OBJECT
-private slots:
-    void initHTTPManager();
-    void runHTTPManager();
-    void cleanHTTPManager();
+public:
+    explicit LinkedConnectionPage(QObject *parent = nullptr);
+    explicit LinkedConnectionPage(
+            const QUrl &uri,
+            const QDateTime &timestamp,
+            const QUrl &hydraNext,
+            const QUrl &hydraPrevious,
+            QObject *parent = nullptr
+            );
+    QUrl uri() const;
+    void setURI(const QUrl &uri);
+    QDateTime timestamp() const;
+    void setTimestamp(const QDateTime &timestamp);
+    QUrl hydraNext() const;
+    void setHydraNext(const QUrl &hydraNext);
+    QUrl hydraPrevious() const;
+    void setHydraPrevious(const QUrl &hydraPrevious);
 
-public slots:
-    void processReply(QNetworkReply *reply);
+signals:
+    void uriChanged();
+    void timestampChanged();
+    void hydraNextChanged();
+    void hydraPreviousChanged();
 
 private:
-    HTTPManager *http;
+    QUrl m_uri;
+    QDateTime m_timestamp;
+    QUrl m_hydraNext;
+    QUrl m_hydraPrevious;
 };
 
-#endif // HTTPMANAGERTEST_H
+#endif // LINKEDCONNECTIONPAGE_H

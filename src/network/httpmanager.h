@@ -20,18 +20,23 @@
 #ifndef HTTPMANAGER_H
 #define HTTPMANAGER_H
 
-#include <QObject>
+#include <QtCore/QObject>
+#include <QtCore/QString>
+#include <QtCore/QList>
 #include <QtCore/QUrl>
+#include <QtCore/QUrlQuery>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkConfigurationManager>
+#include <QtNetwork/QSslError>
 
+// Singleton pattern
 class HTTPManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit HTTPManager();
+    static HTTPManager *getInstance(QObject *parent = nullptr);
     QString userAgent() const;
     void setUserAgent(const QString &userAgent);
     QString acceptHeader() const;
@@ -39,17 +44,26 @@ public:
     void getResource(const QUrl &url);
     void postResource(const QUrl &url, const QByteArray &data);
     void deleteResource(const QUrl &url);
+    void headResource(const QUrl &url);
 
 signals:
-    void onRequestCompleted(QNetworkReply *reply);
-    QList<QSslError> onSSLErrorsReceived(QNetworkReply* reply, QList<QSslError> sslError);
-    QNetworkAccessManager::NetworkAccessibility onNetworkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility state);
+    void requestCompleted(QNetworkReply *reply);
+    QList<QSslError> sslErrorsReceived(QNetworkReply* reply, QList<QSslError> sslError);
+    QNetworkAccessManager::NetworkAccessibility networkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility state);
+    void userAgentChanged();
+    void acceptHeaderChanged();
 
 private:
-    QNetworkRequest prepareRequest(const QUrl &url);
-    QNetworkAccessManager *QNAM;
+    QNetworkAccessManager *m_QNAM;
     QString m_userAgent;
     QString m_acceptHeader;
+    static HTTPManager *m_instance; // error: ‘constexpr’ needed for in-class initialization of static data member ‘tolerance’ of non-integral type
+    explicit HTTPManager(QObject *parent);
+    QNetworkRequest prepareRequest(const QUrl &url);
+    QNetworkAccessManager *QNAM() const;
+    void setQNAM(QNetworkAccessManager *value);
+    static HTTPManager *manager();
+    static void setManager(const HTTPManager *manager);
 };
 
 #endif // HTTPMANAGER_H

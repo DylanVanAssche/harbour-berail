@@ -1,3 +1,22 @@
+/******************************************************************************
+ * Copyright (C) 2018 by Dylan Van Assche                                     *
+ *                                                                            *
+ * This file is part of BeRail.                                               *
+ *                                                                            *
+ *   BeRail is free software: you can redistribute it and/or modify it        *
+ *   under the terms of the GNU Lesser General Public License as published    *
+ *   by the Free Software Foundation, either version 3 of the License, or     *
+ *   (at your option) any later version.                                      *
+ *                                                                            *
+ *   BeRail is distributed in the hope that it will be useful,                *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of           *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *
+ *   GNU Lesser General Public License for more details.                      *
+ *                                                                            *
+ *   You should have received a copy of the GNU Lesser General Public         *
+ *   License along with BeRail.  If not, see <http://www.gnu.org/licenses/>.  *
+ ******************************************************************************/
+
 #include "httpmanagertest.h"
 
 /**
@@ -7,10 +26,11 @@
  * @brief HTTPManagerTest init
  * Init HTTPManagerTest
  */
-void HTTPManagerTest::initHTTPManager() {
+void HTTPManagerTest::initHTTPManager()
+{
     qDebug() << "Init HTTP";
-    http = new HTTPManager();
-    connect(http, SIGNAL(onRequestCompleted(QNetworkReply*)), this, SLOT(processReply(QNetworkReply*)));
+    http = HTTPManager::getInstance();
+    connect(http, SIGNAL(requestCompleted(QNetworkReply *)), this, SLOT(processReply(QNetworkReply *)));
 }
 
 /**
@@ -27,22 +47,27 @@ void HTTPManagerTest::initHTTPManager() {
 void HTTPManagerTest::runHTTPManager()
 {
     // Activate QSignalSpy
-    QSignalSpy spy(http, SIGNAL(onRequestCompleted(QNetworkReply *)));
+    QSignalSpy spy(http, SIGNAL(requestCompleted(QNetworkReply *)));
 
     // HTTP GET
     http->getResource(QUrl("https://httpbin.org/get"));
     // Wait for signal
-    QVERIFY(spy.wait(2000));
+    QVERIFY(spy.wait());
 
     // HTTP POST
     http->postResource(QUrl("https://httpbin.org/post"), QByteArray("HTTP POST OK"));
     // Wait for signal
-    QVERIFY(spy.wait(2000));
+    QVERIFY(spy.wait());
 
     // HTTP DELETE
     http->deleteResource(QUrl("https://httpbin.org/delete"));
     // Wait for signal
-    QVERIFY(spy.wait(2000));
+    QVERIFY(spy.wait());
+
+    // HTTP POST
+    http->headResource(QUrl("https://httpbin.org/get"));
+    // Wait for signal
+    QVERIFY(spy.wait());
 }
 
 /**

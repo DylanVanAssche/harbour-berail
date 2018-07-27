@@ -17,29 +17,24 @@
  *   License along with BeRail.  If not, see <http://www.gnu.org/licenses/>.  *
  ******************************************************************************/
 
-#ifndef HTTPMANAGERTEST_H
-#define HTTPMANAGERTEST_H
+#ifndef LINKEDCONNECTIONPAGETEST_H
+#define LINKEDCONNECTIONPAGETEST_H
 
 #include <QObject>
 #include <QtTest/QtTest>
 #include <QSignalSpy>
-#include "../src/network/httpmanager.h"
+#include "../src/linkedconnections/linkedconnectionpage.h"
 
-#define SIGNAL_WAIT_TIME 3000
-
-class HTTPManagerTest : public QObject
+class LinkedConnectionPageTest: public QObject
 {
     Q_OBJECT
 private slots:
-    void initHTTPManager();
-    void runHTTPManager();
-    void cleanHTTPManager();
-
-public slots:
-    void processReply(QNetworkReply *reply);
+    void initLinkedConnectionPageTest();
+    void runLinkedConnectionPageTest();
+    void cleanLinkedConnectionPageTest();
 
 private:
-    HTTPManager *http;
+    LinkedConnectionPage *page;
 };
 
-#endif // HTTPMANAGERTEST_H
+#endif // LINKEDCONNECTIONPAGETEST_H
