@@ -26,9 +26,7 @@ LinkedConnectionsFactory::LinkedConnectionsFactory(const QString &path, QObject 
 {
     // Set parent of this QObject. When parent is destroyed, this one is automatically cleaned up too.
     this->setParent(parent);
-    this->setDb(DatabaseManager::getInstance(path, parent));
     this->setHttp(HTTPManager::getInstance(parent));
-    this->initDatabase();
     connect(this->http(), SIGNAL(requestCompleted(QNetworkReply *)), this, SLOT(processHTTPReply(QNetworkReply *)));
 }
 
@@ -45,185 +43,30 @@ LinkedConnectionsFactory *LinkedConnectionsFactory::getInstance(const QString &p
 // Invokers
 void LinkedConnectionsFactory::getPage(const QUrl &uri)
 {
-    // Try to fetch the page from the database
-    QList<LinkedConnectionFragment *> fragments = this->getPageByURIFromDatabaseManager(uri);
+    // Use processing methods to allow other extensions in the future if needed
+    this->getPageByURIFromHTTPManager(uri);
+}
 
-    // If list is empty then the page isn't cached yet
-    if(fragments.size() == 0) {
-        qDebug() << "Database can't find page, fetching now...";
-        this->getPageByURIFromHTTPManager(uri);
-    }
-    else {
-        qDebug() << "Page is available in database";
-        emit fragmentsReady(fragments);
-    }
+void LinkedConnectionsFactory::getPage(const QDateTime &timestamp)
+{
+    // Construct the URI of the page
+    QUrl uri = QUrl(BASE_URL);
+    QUrlQuery parameters;
+    // Qt:ISODate returns 2018-07-27T14:18:40 while we need 2018-07-27T14:18:40.000Z
+    parameters.addQueryItem("departureTime", timestamp.toString(Qt::ISODate) + ".000Z");
+    uri.setQuery(parameters);
+
+    // Use processing methods to allow other extensions in the future if needed
+    this->getPageByURIFromHTTPManager(uri);
 }
 
 // Processors
-QList<LinkedConnectionFragment *> LinkedConnectionsFactory::getPageByURIFromDatabaseManager(const QUrl &uri)
-{
-    QSqlQuery query(this->db()->database());
-    QList<LinkedConnectionFragment *> fragments;
-    if(this->isPageInDatabase(uri)) {
-        // Finding fragments from the page
-        query.prepare("SELECT "
-                      "uri,"
-                      "page,"
-                      "departureStationURI,"
-                      "arrivalStationURI,"
-                      "departureTime,"
-                      "arrivalTime,"
-                      "departureDelay,"
-                      "arrivalDelay,"
-                      "tripURI,"
-                      "routeURI,"
-                      "direction"
-                      " FROM fragments WHERE page = ? "
-                      "ORDER BY departureTime DESC"); // Sorting the results (descending order) for the CSA algorithm
-        query.addBindValue(uri); // Match page URI's
-        this->db()->execute(query);
-        while (query.next())
-        {
-            // Using the field name in overload query.value(x) is less efficient then using indexes according to the Qt 5.6.3 docs
-            QUrl uri = query.value(0).toUrl();
-            QUrl departureStationURI = query.value(1).toUrl();
-            QUrl arrivalStationURI = query.value(2).toUrl();
-            QDateTime departureTime = query.value(3).toDateTime();
-            QDateTime arrivalTime = query.value(4).toDateTime();
-            qint16 departureDelay = query.value(5).toInt();
-            qint16 arrivalDelay = query.value(6).toInt();
-            QUrl tripURI = query.value(7).toUrl();
-            QUrl routeURI = query.value(8).toUrl();
-            QString direction = query.value(9).toString();
-
-            // Generate a new LinkedConnectionFragment and append it
-            LinkedConnectionFragment *frag = new LinkedConnectionFragment(uri,
-                                                                          departureStationURI,
-                                                                          arrivalStationURI,
-                                                                          departureTime,
-                                                                          arrivalTime,
-                                                                          departureDelay,
-                                                                          arrivalDelay,
-                                                                          tripURI,
-                                                                          routeURI,
-                                                                          direction,
-                                                                          m_instance);
-            fragments.append(frag);
-        }
-    }
-    return fragments;
-}
-
 void LinkedConnectionsFactory::getPageByURIFromHTTPManager(const QUrl &uri)
 {
     this->http()->getResource(uri);
 }
 
 // Helpers
-void LinkedConnectionsFactory::initDatabase()
-{
-    // On instantation, create the fragments table in the database if it doesn't exist yet.
-    QSqlQuery query(this->db()->database());
-
-    // PAGES table
-    bool succes = query.prepare("CREATE TABLE IF NOT EXISTS pages ("
-                                "uri TEXT PRIMARY KEY ON CONFLICT IGNORE, "
-                                "timestamp INT, " // Sorting using UNIX timestamp is much faster then DATE based according to the SQLite docs.
-                                "hydraNext TEXT, "
-                                "hydraPrevious TEXT,"
-                                "UNIQUE(uri, timestamp))");
-    succes = this->db()->execute(query);
-    query.clear(); // Release resources for reuse
-
-    // FRAGMENTS table
-    succes = query.prepare("CREATE TABLE IF NOT EXISTS fragments ("
-                           "uri TEXT PRIMARY KEY ON CONFLICT IGNORE, "
-                           "page TEXT, "
-                           "departureStationURI TEXT, "
-                           "arrivalStationURI TEXT, "
-                           "departureTime TEXT, "
-                           "arrivalTime TEXT, "
-                           "departureDelay INT, "
-                           "arrivalDELAY INT, "
-                           "tripURI TEXT, "
-                           "routeURI TEXT, "
-                           "direction TEXT, "
-                           "UNIQUE(uri, direction))");
-    succes = this->db()->execute(query);
-
-    if(succes)
-    {
-        qDebug() << "Database init OK";
-    }
-    else {
-        qCritical() << "Unable to create tables:" << query.lastError().text();
-    }
-}
-
-bool LinkedConnectionsFactory::isPageInDatabase(const QUrl &uri)
-{
-    QSqlQuery query(this->db()->database());
-    // Qt 5.6.3 docs: Using SELECT * is not recommended because the order of the fields in the query is undefined.
-    // Find page by URI
-    query.prepare("SELECT uri FROM pages WHERE uri = ?");
-    query.addBindValue(uri.toString()); // Match URI's
-    this->db()->execute(query);
-    return query.next(); // Page in database when #records != 0
-}
-
-bool LinkedConnectionsFactory::addPageToDatabase(const QString &uri, const qint64 &timestamp, const QString &hydraNext, const QString &hydraPrevious)
-{
-    QSqlQuery query(this->db()->database());
-    query.prepare("INSERT OR IGNORE INTO "
-                  "pages(uri, timestamp, hydraNext, hydraPrevious) "
-                  "VALUES(:uri, :timestamp, :hydraNext, :hydraPrevious)");
-    query.bindValue(":uri", uri);
-    query.bindValue(":timestamp", timestamp);
-    query.bindValue(":hydraNext", hydraNext);
-    query.bindValue(":hydraPrevious", hydraPrevious);
-    return this->db()->execute(query);
-}
-
-bool LinkedConnectionsFactory::addFragmentToDatabase(const QString &pageURI, LinkedConnectionFragment *fragment)
-{
-    QSqlQuery query(this->db()->database());
-    query.prepare("INSERT OR IGNORE INTO fragments ("
-                  "uri, "
-                  "page, "
-                  "departureStationURI, "
-                  "arrivalStationURI, "
-                  "departureTime, "
-                  "arrivalTime, "
-                  "departureDelay, "
-                  "arrivalDelay, "
-                  "tripURI, "
-                  "routeURI, "
-                  "direction)"
-                  " VALUES(:uri, "
-                  ":page, "
-                  ":departureStationURI, "
-                  ":arrivalStationURI, "
-                  ":departureTime, "
-                  ":arrivalTime, "
-                  ":departureDelay, "
-                  ":arrivalDelay, "
-                  ":tripURI, "
-                  ":routeURI, "
-                  ":direction)");
-    query.bindValue(":uri", fragment->uri().toString());
-    query.bindValue(":page", pageURI);
-    query.bindValue(":departureStationURI", fragment->departureStationURI().toString());
-    query.bindValue(":arrivalStationURI", fragment->arrivalStationURI().toString());
-    query.bindValue(":departureTime", fragment->departureTime().toMSecsSinceEpoch());
-    query.bindValue(":arrivalTime", fragment->arrivalTime().toMSecsSinceEpoch());
-    query.bindValue(":departureDelay", fragment->departureDelay());
-    query.bindValue(":arrivalDelay", fragment->arrivalDelay());
-    query.bindValue(":tripURI", fragment->tripURI().toString());
-    query.bindValue(":routeURI", fragment->routeURI().toString());
-    query.bindValue(":direction", fragment->direction());
-    return this->db()->execute(query);
-}
-
 LinkedConnectionFragment *LinkedConnectionsFactory::generateFragmentFromJSON(const QJsonObject &connection)
 {
     QUrl uri = QUrl(connection["@id"].toString());
@@ -262,8 +105,6 @@ LinkedConnectionFragment *LinkedConnectionsFactory::generateFragmentFromJSON(con
 
 void LinkedConnectionsFactory::processHTTPReply(QNetworkReply *reply)
 {
-    QList<LinkedConnectionFragment *> fragments = QList<LinkedConnectionFragment *>();
-
     if(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 200) {
         qDebug() << "Content-Header:" << reply->header(QNetworkRequest::ContentTypeHeader).toString();
         qDebug() << "Content-Length:" << reply->header(QNetworkRequest::ContentLengthHeader).toULongLong() << "bytes";
@@ -271,85 +112,55 @@ void LinkedConnectionsFactory::processHTTPReply(QNetworkReply *reply)
         qDebug() << "HTTP reason:" << reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
         qDebug() << "Cache:" << reply->attribute(QNetworkRequest::SourceIsFromCacheAttribute).toBool();
 
-        // Check if the redirect URL is already in our database
-        fragments = this->getPageByURIFromDatabaseManager(reply->url());
+        // Read HTTP reply
+        QString replyData = (QString)reply->readAll();
 
-        if(reply->operation() == QNetworkAccessManager::Operation::HeadOperation) {
-            if(fragments.size() == 0) {
-                qDebug() << "Page is out of date or not in database, fetching now...";
-                // Handle HEAD request for caching purposes TODO
+        // HTTP 200 OK, create LCPage and LCFragment list
+        QList<LinkedConnectionFragment *> fragments = QList<LinkedConnectionFragment *>();
+
+        // Try to parse the data as JSON
+        QJsonParseError parseError;
+        QJsonDocument jsonData = QJsonDocument::fromJson(replyData.toUtf8(), &parseError);
+        if(parseError.error == QJsonParseError::NoError) {
+            QJsonObject jsonObject = jsonData.object();
+
+            // Linked Connections fragments
+            QJsonArray graph = jsonObject["@graph"].toArray();
+
+            foreach(QJsonValue item, graph) {
+                QJsonObject connection = item.toObject();
+                LinkedConnectionFragment *frag = this->generateFragmentFromJSON(connection);
+                fragments.append(frag);
             }
+
+            // Linked Connections page
+            QString pageURI = jsonObject["@id"].toString();
+            QDateTime pageTimestamp = QDateTime::fromString(pageURI.right(24), Qt::ISODate); // TO DO REGEX
+            QString hydraNext = jsonObject["hydra:next"].toString();
+            QString hydraPrevious = jsonObject["hydra:previous"].toString();
+            LinkedConnectionPage *page = new LinkedConnectionPage(
+                        pageURI,
+                        pageTimestamp,
+                        hydraNext,
+                        hydraPrevious,
+                        fragments
+                        );
+
+            emit this->pageReady(page);
         }
-        else if(reply->operation() == QNetworkAccessManager::Operation::GetOperation) {
-            // Redirect URL isn't in DB, process the dataset
-            if(fragments.size() == 0) {
-                // Get the data from the request
-                QString replyData = (QString)reply->readAll();
-
-                // Prepare database queries in a transaction for performance reasons
-                this->db()->startTransaction();
-
-                // Try to parse the data as JSON
-                QJsonParseError parseError;
-                QJsonDocument jsonData = QJsonDocument::fromJson(replyData.toUtf8(), &parseError);
-                if(parseError.error == QJsonParseError::NoError) {
-                    QJsonObject jsonObject = jsonData.object();
-                    // Linked Connections page
-                    // Save page in DB
-                    QString pageURI = jsonObject["@id"].toString();
-                    QDateTime pageTimestamp = QDateTime::fromString(pageURI.right(24), Qt::ISODate); // TO DO REGEX
-                    QString hydraNext = jsonObject["hydra:next"].toString();
-                    QString hydraPrevious = jsonObject["hydra:previous"].toString();
-                    this->addPageToDatabase(pageURI, pageTimestamp.toMSecsSinceEpoch(), hydraNext, hydraPrevious);
-                    LinkedConnectionPage *page = new LinkedConnectionPage(
-                                pageURI,
-                                pageTimestamp,
-                                hydraNext,
-                                hydraPrevious
-                                );
-                    emit this->pageReady(page);
-
-                    // Linked Connections fragments
-                    QJsonArray graph = jsonObject["@graph"].toArray();
-
-                    foreach(QJsonValue item, graph) {
-                        QJsonObject connection = item.toObject();
-                        LinkedConnectionFragment *frag = this->generateFragmentFromJSON(connection);
-                        this->addFragmentToDatabase(pageURI, frag);
-                        fragments.append(frag);
-                    }
-                }
-                else {
-                    qWarning() << "Parsing JSON data failed:" << parseError.errorString();
-                }
-
-                // Finish insertion and clean up
-                this->db()->endTransaction();
-                qDebug() << fragments.size() << "fragments ready in DB";
-            }
+        else {
+            qWarning() << "Parsing JSON data failed:" << parseError.errorString();
         }
-        reply->deleteLater();
+
     }
     else {
         qWarning() << reply->readAll();
         qWarning() << "HTTP request failed! HTTP code:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toString();
     }
-
-    // Emit in all cases to avoid blocking callback
-    emit this->fragmentsReady(fragments);
+    reply->deleteLater();
 }
 
 // Getters & Setters
-DatabaseManager *LinkedConnectionsFactory::db() const
-{
-    return m_db;
-}
-
-void LinkedConnectionsFactory::setDb(DatabaseManager *db)
-{
-    m_db = db;
-}
-
 HTTPManager *LinkedConnectionsFactory::http() const
 {
     return m_http;

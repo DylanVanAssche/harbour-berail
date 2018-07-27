@@ -38,6 +38,9 @@ HTTPManager::HTTPManager(QObject* parent): QObject(parent)
     this->setQNAM(new QNetworkAccessManager(this));
     QNetworkConfigurationManager QNAMConfig;
     this->QNAM()->setConfiguration(QNAMConfig.defaultConfiguration());
+    this->setCache(new QNetworkDiskCache(this));
+    ((QNetworkDiskCache *)this->cache())->setCacheDirectory("~/.local/share/harbour-berail/network");
+    this->QNAM()->setCache(this->cache());
 
     // Connect QNetworkAccessManager signals
     connect(this->QNAM(), SIGNAL(networkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility)), this, SIGNAL(networkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility)));
@@ -209,10 +212,9 @@ void HTTPManager::setAcceptHeader(const QString &acceptHeader)
  * @file httpmanager.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Sets the current accept header
- * @param const QString &acceptHeader
+ * @brief Gets the QNAM instance
  * @public
- * Changes the current accept header to the given QString.
+ * Gets the QNetworkAccessManager instance
  */
 QNetworkAccessManager *HTTPManager::QNAM() const
 {
@@ -223,12 +225,39 @@ QNetworkAccessManager *HTTPManager::QNAM() const
  * @file httpmanager.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Sets the current accept header
- * @param const QString &acceptHeader
+ * @brief Sets the QNAM instance
+ * @param QNetworkAccessManager *value
  * @public
- * Changes the current accept header to the given QString.
+ * Sets the QNetworkAccessManager instance
  */
 void HTTPManager::setQNAM(QNetworkAccessManager *value)
 {
     m_QNAM = value;
+}
+
+/**
+ * @file httpmanager.cpp
+ * @author Dylan Van Assche
+ * @date 21 Jul 2018
+ * @brief Gets the QNAM cache instance
+ * @public
+ * Gets the QAbstractNetworkCache instance
+ */
+QAbstractNetworkCache *HTTPManager::cache() const
+{
+    return m_cache;
+}
+
+/**
+ * @file httpmanager.cpp
+ * @author Dylan Van Assche
+ * @date 21 Jul 2018
+ * @brief Sets the QNAM cache instance
+ * @param QAbstractNetworkCache *cache
+ * @public
+ * Sets the QAbstractNetworkCache instance
+ */
+void HTTPManager::setCache(QAbstractNetworkCache *cache)
+{
+    m_cache = cache;
 }

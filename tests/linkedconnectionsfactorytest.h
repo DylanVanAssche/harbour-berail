@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QtTest/QtTest>
 #include <QSignalSpy>
+#include <QMetaType>
 #include <QtSql/QSqlQuery>
 #include "../src/linkedconnections/linkedconnectionsfactory.h"
 #include "../src/database/databasemanager.h"

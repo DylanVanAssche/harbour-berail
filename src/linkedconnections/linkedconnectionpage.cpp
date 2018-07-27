@@ -49,13 +49,14 @@ LinkedConnectionPage::LinkedConnectionPage(QObject *parent) : QObject(parent)
  * Constructs a LinkedConnectionPage to store the information about
  * a Linked Connection page for the Connection Scan Algorithm (CSA).
  */
-LinkedConnectionPage::LinkedConnectionPage(const QUrl &uri, const QDateTime &timestamp, const QUrl &hydraNext, const QUrl &hydraPrevious, QObject *parent)
+LinkedConnectionPage::LinkedConnectionPage(const QUrl &uri, const QDateTime &timestamp, const QUrl &hydraNext, const QUrl &hydraPrevious, const QList<LinkedConnectionFragment *> &fragments, QObject *parent)
 {
     // Avoid signal triggering on contruction
     m_uri = uri;
     m_timestamp = timestamp;
     m_hydraNext = hydraNext;
     m_hydraPrevious = hydraPrevious;
+    m_fragments = fragments;
 
     // Set parent of this QObject. When parent is destroyed, this one is automatically cleaned up too.
     this->setParent(parent);
@@ -179,4 +180,34 @@ void LinkedConnectionPage::setHydraPrevious(const QUrl &hydraPrevious)
 {
     m_hydraPrevious = hydraPrevious;
     emit this->hydraPreviousChanged();
+}
+
+/**
+ * @file linkedconnectionpage.cpp
+ * @author Dylan Van Assche
+ * @date 27 Jul 2018
+ * @brief Gets the list of fragments associated with this page
+ * @return QList<LinkedConnectionFragment *> fragments
+ * @public
+ * Gets the list of fragments associated with this page and return it.
+ */
+QList<LinkedConnectionFragment *> LinkedConnectionPage::fragments() const
+{
+    return m_fragments;
+}
+
+/**
+ * @file linkedconnectionpage.cpp
+ * @author Dylan Van Assche
+ * @date 27 Jul 2018
+ * @brief  Sets the list of fragments associated with this page
+ * @param const QList<LinkedConnectionFragment *> &fragments
+ * @public
+ * Sets the list of fragments associated with this page to the given QList<LinkedConnectionFragment *> &fragments.
+ * Emits the fragmentsChanged signal.
+ */
+void LinkedConnectionPage::setFragments(const QList<LinkedConnectionFragment *> &fragments)
+{
+    m_fragments = fragments;
+    emit this->fragmentsChanged();
 }

@@ -30,6 +30,8 @@
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkConfigurationManager>
 #include <QtNetwork/QSslError>
+#include <QtNetwork/QAbstractNetworkCache>
+#include <QtNetwork/QNetworkDiskCache>
 
 // Singleton pattern
 class HTTPManager : public QObject
@@ -55,6 +57,7 @@ signals:
 
 private:
     QNetworkAccessManager *m_QNAM;
+    QAbstractNetworkCache *m_cache;
     QString m_userAgent;
     QString m_acceptHeader;
     static HTTPManager *m_instance; // error: ‘constexpr’ needed for in-class initialization of static data member ‘tolerance’ of non-integral type
@@ -62,6 +65,8 @@ private:
     QNetworkRequest prepareRequest(const QUrl &url);
     QNetworkAccessManager *QNAM() const;
     void setQNAM(QNetworkAccessManager *value);
+    QAbstractNetworkCache *cache() const;
+    void setCache(QAbstractNetworkCache *cache);
     static HTTPManager *manager();
     static void setManager(const HTTPManager *manager);
 };
