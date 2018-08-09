@@ -17,4 +17,9 @@
         <file>icons/icon-occupancy-medium.svg</file>
         <file>icons/icon-occupancy-unknown.svg</file>
     </qresource>
+    <qresource prefix="/data">
+        <file>stations/stops.csv</file>
+        <file>stations/stations.csv</file>
+        <file>stations/facilities.csv</file>
+    </qresource>
 </RCC>

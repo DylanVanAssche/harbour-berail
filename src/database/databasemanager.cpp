@@ -18,21 +18,23 @@
  ******************************************************************************/
 
 #include "databasemanager.h"
-DatabaseManager* DatabaseManager::m_instance = nullptr;
+
+Database::Manager* Database::Manager::m_instance = nullptr;
 
 /**
  * @file databasemanager.cpp
  * @author Dylan Van Assche
  * @date 20 Jul 2018
- * @brief DatabaseManager facade constructor
+ * @brief Manager facade constructor
  * @param QObject *parent
  * @param QString path
+ * @package Database
  * @public
- * Constructs a DatabaseManager facade to access the database using the SQL language.
- * The DatabaseManager facade makes database access in Qt abstract from the underlying database (SQLite, MySQL, ORACLE, ...).
+ * Constructs a Manager facade to access the database using the SQL language.
+ * The Manager facade makes database access in Qt abstract from the underlying database (SQLite, MySQL, ORACLE, ...).
  * Any errors during initialisation of the database are catched and logged as CRITICAL.
  */
-DatabaseManager::DatabaseManager(const QString &path, QObject *parent)
+Database::Manager::Manager(const QString &path, QObject *parent)
 {
     // Set parent of this QObject. When parent is destroyed, this one is automatically cleaned up too.
     this->setParent(parent);
@@ -40,7 +42,7 @@ DatabaseManager::DatabaseManager(const QString &path, QObject *parent)
     if(QSqlDatabase::isDriverAvailable(DRIVER)) {
         this->setDatabase(QSqlDatabase::addDatabase(DRIVER));
         this->database().setDatabaseName(path);
-        qDebug() << this->database().databaseName();
+        qDebug() << "Database name:" << this->database().databaseName();
 
         if (!this->database().open()) {
             qCritical() << "Connection to database failed";
@@ -57,16 +59,18 @@ DatabaseManager::DatabaseManager(const QString &path, QObject *parent)
  * @file databasemanager.cpp
  * @author Dylan Van Assche
  * @date 21 Jul 2018
- * @brief Gets a DatabaseManager instance
+ * @brief Gets a Database::Manager instance
+ * @return Database::Manager *manager
+ * @package Database
  * @public
- * Gets a DatabaseManager instance using the Singleton pattern.
+ * Constructs a Database::Manager instance if none exists and returns it.
  */
-DatabaseManager *DatabaseManager::getInstance(const QString &path, QObject *parent)
+Database::Manager *Database::Manager::getInstance(const QString &path, QObject *parent)
 {
     // NICE-TO-HAVE: Allow access to multiple databases by checking the path of the database
     if(m_instance == nullptr) {
-        qDebug() << "Creating new DatabaseManager";
-        m_instance = new DatabaseManager(path, parent);
+        qDebug() << "Creating new Database::Manager";
+        m_instance = new Manager(path, parent);
     }
     return m_instance;
 }
@@ -78,15 +82,15 @@ DatabaseManager *DatabaseManager::getInstance(const QString &path, QObject *pare
  * @brief Executes a given QSqlQuery
  * @param QSqlQuery query
  * @return bool success
+ * @package Database
  * @public
  * Executes the given QSqlQuery query on the active database.
  * Before the execution takes place, the connection is checked.
  * During the execution, the errors are catched and logged as CRITICAL.
  */
-bool DatabaseManager::execute(QSqlQuery &query)
+bool Database::Manager::execute(QSqlQuery &query)
 {
     if(this->database().isOpen() && query.exec()) {
-        //qDebug() << "Executing querry OK:" << query.executedQuery();
         return true;
     }
     else {
@@ -95,12 +99,36 @@ bool DatabaseManager::execute(QSqlQuery &query)
     }
 }
 
-bool DatabaseManager::startTransaction()
+/**
+ * @file databasemanager.cpp
+ * @author Dylan Van Assche
+ * @date 9 Aug 2018
+ * @brief Starts the transaction
+ * @return bool success
+ * @package Database
+ * @public
+ * Starts a transaction in the database.
+ * After you are done with your changes you should
+ * call Database::Manager::endTransaction() to
+ * commit your changes.
+ */
+bool Database::Manager::startTransaction()
 {
     return this->database().transaction();
 }
 
-bool DatabaseManager::endTransaction()
+/**
+ * @file databasemanager.cpp
+ * @author Dylan Van Assche
+ * @date 9 Aug 2018
+ * @brief Ends the transaction
+ * @return bool success
+ * @package Database
+ * @warning This method won't do anything if no transaction was running.
+ * @public
+ * Commits changes to the database and returns true if success.
+ */
+bool Database::Manager::endTransaction()
 {
     return this->database().commit();
 }
@@ -111,10 +139,11 @@ bool DatabaseManager::endTransaction()
  * @date 20 Jul 2018
  * @brief Sets the QSqlDatabase database
  * @param const QSqlDatabase &database
+ * @package Database
  * @private
  * Sets the current QSqlDatabase database to the given QSqlDatabase &database.
  */
-void DatabaseManager::setDatabase(const QSqlDatabase &database)
+void Database::Manager::setDatabase(const QSqlDatabase &database)
 {
     m_database = database;
 }
@@ -125,10 +154,11 @@ void DatabaseManager::setDatabase(const QSqlDatabase &database)
  * @date 20 Jul 2018
  * @brief Gets the current QSqlDatabase database
  * @return QSqlDatabase database
+ * @package Database
  * @public
  * Gets the QSqlDatabase database and returns it.
  */
-QSqlDatabase DatabaseManager::database() const
+QSqlDatabase Database::Manager::database() const
 {
     return m_database;
 }

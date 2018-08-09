@@ -28,24 +28,26 @@
 
 #include "logger.h"
 #include "os.h"
-#include <QtTest>
-#include "../tests/httpmanagertest.h"
-#include "../tests/databasemanagertest.h"
-#include "../tests/linkedconnectionfragmenttest.h"
-#include "../tests/linkedconnectionpagetest.h"
-#include "../tests/linkedconnectionsfactorytest.h"
+#include "../tests/network/networkmanagertest.h"
+#include "../tests/database/databasemanagertest.h"
+#include "../tests/fragments/fragmentsfragmenttest.h"
+#include "../tests/fragments/fragmentspagetest.h"
+#include "../tests/fragments/fragmentsfactorytest.h"
+#include "../tests/csa/csaplannertest.h"
 
 // Add toString() method to all custom method
 
 int main(int argc, char *argv[])
 {
     // Set up qml engine.
-    /*QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
+    QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
     QScopedPointer<QQuickView> view(SailfishApp::createView());
     qApp->setApplicationVersion(QString(APP_VERSION));
 
     // Set application version and enable logging
+#ifndef QT_QML_DEBUG
     enableLogger(true);
+#endif
 
     // Enable default translations
     QTranslator *translator = new QTranslator(qApp);
@@ -80,12 +82,5 @@ int main(int argc, char *argv[])
     view->setSource(SailfishApp::pathTo("qml/harbour-berail.qml"));
     view->show();
 
-    return app->exec();*/
-    HTTPManagerTest testSuiteHTTP;
-    DatabaseManagerTest testSuiteDB;
-    LinkedConnectionFragmentTest testSuiteLCFragment;
-    LinkedConnectionPageTest testSuiteLCPage;
-    LinkedConnectionsFactoryTest testSuiteLCFactory;
-    QCoreApplication app(argc, argv); // Allow QEventLoops for QSignalSpy
-    return QTest::qExec(&testSuiteHTTP, argc, argv) | QTest::qExec(&testSuiteDB, argc, argv) | QTest::qExec(&testSuiteLCFragment, argc, argv) | QTest::qExec(&testSuiteLCPage, argc, argv) | QTest::qExec(&testSuiteLCFactory, argc, argv) | app.exec();
+    return app->exec();
 }

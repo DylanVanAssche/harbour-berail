@@ -34,11 +34,12 @@
 #define DRIVER "QSQLITE"
 
 // Singleton pattern
-class DatabaseManager : public QObject
+namespace Database {
+class Manager : public QObject
 {
     Q_OBJECT
 public:
-    static DatabaseManager *getInstance(const QString &path, QObject *parent = nullptr);
+    static Manager *getInstance(const QString &path, QObject *parent = nullptr);
     bool execute(QSqlQuery &query);
     bool startTransaction();
     bool endTransaction();
@@ -46,9 +47,10 @@ public:
 
 private:
     QSqlDatabase m_database;
-    explicit DatabaseManager(const QString &path, QObject *parent);
-    static DatabaseManager *m_instance;
+    explicit Manager(const QString &path, QObject *parent);
+    static Manager *m_instance;
     void setDatabase(const QSqlDatabase &database);
 };
+}
 
 #endif // DATABASEMANAGER_H

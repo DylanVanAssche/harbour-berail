@@ -23,10 +23,14 @@ CONFIG += sailfishapp
 QT += core \
     network \
     positioning \
-    testlib \
+    concurrent \
     sql
 
-CONFIG += c++11
+CONFIG += console \
+    c++11
+
+# Add external module QtCSV to read CSV files
+include(qtcsv/qtcsv.pri)
 
 # OS module notification support
 PKGCONFIG += nemonotifications-qt5
@@ -77,7 +81,10 @@ DISTFILES += \
     qml/pages/DisturbancesPage.qml \
     qml/pages/SettingsPage.qml \
     qml/components/GlassStationButton.qml \
-    qml/pages/TripDetailHeader.qml
+    qml/pages/TripDetailHeader.qml \
+    stations/stops.csv \
+    stations/stations.csv \
+    stations/facilities.csv
 
 RESOURCES += \
     qml/resources/resources.qrc
@@ -85,30 +92,46 @@ RESOURCES += \
 HEADERS += \
     src/logger.h \
     src/os.h \
-    src/database/databasemanager.h \
-    src/network/httpmanager.h \
-    tests/httpmanagertest.h \
-    tests/databasemanagertest.h \
-    src/linkedconnections/linkedconnectionfragment.h \
-    tests/linkedconnectionfragmenttest.h \
-    src/linkedconnections/linkedconnectionsfactory.h \
-    tests/linkedconnectionsfactorytest.h \
-    src/linkedconnections/linkedconnectionpage.h \
-    tests/linkedconnectionpagetest.h
+    src/linkedconnections/csa/csaplanner.h \
+    src/linkedconnections/csa/csastationstopprofile.h \
+    src/linkedconnections/csa/csatrainprofile.h \
+    src/linkedconnections/csa/csaroute.h \
+    src/linkedconnections/csa/csarouteleg.h \
+    src/linkedconnections/csa/csatransfer.h \
+    src/linkedconnections/csa/csamessage.h \
+    src/linkedconnections/csa/csaroutelegend.h \
+    src/linkedconnections/csa/csavehicle.h \
+    src/linkedconnections/csa/csastation.h \
+    src/linkedconnections/csa/csavehiclestop.h \
+    src/linkedconnections/csa/csastationfactory.h \
+    src/linkedconnections/fragments/fragmentsfactory.h \
+    src/linkedconnections/fragments/fragmentsfragment.h \
+    src/linkedconnections/fragments/fragmentspage.h \
+    src/linkedconnections/csa/csanullstation.h \
+    src/network/networkmanager.h \
+    src/database/databasemanager.h
 
 SOURCES += src/harbour-berail.cpp \
     src/logger.cpp \
     src/os.cpp \
-    src/database/databasemanager.cpp \
-    src/network/httpmanager.cpp \
-    tests/httpmanagertest.cpp \
-    tests/databasemanagertest.cpp \
-    src/linkedconnections/linkedconnectionfragment.cpp \
-    tests/linkedconnectionfragmenttest.cpp \
-    src/linkedconnections/linkedconnectionsfactory.cpp \
-    tests/linkedconnectionsfactorytest.cpp \
-    src/linkedconnections/linkedconnectionpage.cpp \
-    tests/linkedconnectionpagetest.cpp
+    src/linkedconnections/csa/csaplanner.cpp \
+    src/linkedconnections/csa/csastationstopprofile.cpp \
+    src/linkedconnections/csa/csatrainprofile.cpp \
+    src/linkedconnections/csa/csaroute.cpp \
+    src/linkedconnections/csa/csarouteleg.cpp \
+    src/linkedconnections/csa/csatransfer.cpp \
+    src/linkedconnections/csa/csamessage.cpp \
+    src/linkedconnections/csa/csaroutelegend.cpp \
+    src/linkedconnections/csa/csavehicle.cpp \
+    src/linkedconnections/csa/csastation.cpp \
+    src/linkedconnections/csa/csavehiclestop.cpp \
+    src/linkedconnections/csa/csastationfactory.cpp \
+    src/linkedconnections/fragments/fragmentsfactory.cpp \
+    src/linkedconnections/fragments/fragmentsfragment.cpp \
+    src/linkedconnections/fragments/fragmentspage.cpp \
+    src/linkedconnections/csa/csanullstation.cpp \
+    src/network/networkmanager.cpp \
+    src/database/databasemanager.cpp
 
 OTHER_FILES += qml/harbour-berail.qml \
     qml/cover/CoverPage.qml \
@@ -117,3 +140,28 @@ OTHER_FILES += qml/harbour-berail.qml \
     rpm/harbour-berail.yaml \
     translations/*.ts \
     harbour-berail.desktop
+
+# Generate test builds if required
+tests {
+    message(Unittest mode)
+    QT += testlib
+
+    SOURCES -= src/harbour-berail.cpp
+
+    HEADERS += tests/database/databasemanagertest.h \
+        tests/csa/csaplannertest.h \
+        tests/network/networkmanagertest.h \
+        tests/fragments/fragmentsfactorytest.h \
+        tests/fragments/fragmentsfragmenttest.h \
+        tests/fragments/fragmentspagetest.h
+
+    SOURCES += tests/database/databasemanagertest.cpp \
+        tests/csa/csaplannertest.cpp \
+        tests/network/networkmanagertest.cpp \
+        tests/fragments/fragmentsfactorytest.cpp \
+        tests/fragments/fragmentsfragmenttest.cpp \
+        tests/fragments/fragmentspagetest.cpp \
+        tests/harbour-berail-test.cpp
+} else {
+    message(Normal mode)
+}
