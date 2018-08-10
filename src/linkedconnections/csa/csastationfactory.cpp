@@ -71,229 +71,238 @@ CSA::StationFactory *CSA::StationFactory::getInstance(QObject *parent)
  * @package CSA
  * @public
  * Retrieves a station by URI from the database.
+ * In case something goes wrong, a CSA::NullStation instance is returned.
  */
 CSA::Station *CSA::StationFactory::getStationByURI(const QUrl &uri)
 {
-    // Fetch station from database
-    QSqlQuery query(this->db()->database());
-    query.prepare("SELECT "
-                  "uri, "
-                  "name, "
-                  "alternativeFR, "
-                  "alternativeNL, "
-                  "alternativeDE, "
-                  "alternativeEN, "
-                  "street, "
-                  "zip, "
-                  "city, "
-                  "countryCode, "
-                  "longitude, "
-                  "latitude, "
-                  "ticketVendingMachine, "
-                  "luggageLockers, "
-                  "freeParking, "
-                  "taxi, "
-                  "bicycleSpots, "
-                  "blueBike, "
-                  "bus, "
-                  "tram, "
-                  "metro, "
-                  "wheelchairAvailable, "
-                  "ramp, "
-                  "disabledParkingSpots, "
-                  "elevatedPlatform, "
-                  "escalatorUp, "
-                  "escalatorDown, "
-                  "elevatorPlatform, "
-                  "hearingAidSignal, "
-                  "salesOpenMonday, "
-                  "salesCloseMonday, "
-                  "salesOpenTuesday, "
-                  "salesCloseTuesday, "
-                  "salesOpenWednesday, "
-                  "salesCloseWednesday, "
-                  "salesOpenThursday, "
-                  "salesCloseThursday, "
-                  "salesOpenFriday, "
-                  "salesCloseFriday, "
-                  "salesOpenSaturday, "
-                  "salesCloseSaturday, "
-                  "salesOpenSunday, "
-                  "salesCloseSunday, "
-                  "avgStopTimes "
-                  "FROM stations "
-                  "WHERE uri = :uri");
-    query.bindValue(":uri", uri); // Match page URI's
-    this->db()->execute(query);
+    // Init CSA::Station variable
+    CSA::Station *station;
 
-    // Read result and create a new Station object
-    while (query.next())
-    {
-        // Init Station variable
-        CSA::Station *station;
+    // Try to get the station from the cache
+    station = this->fetchStationFromCache(uri);
 
-        // Using the field name in overload query.value(x) is less efficient then using indexes according to the Qt 5.6.3 docs
-        QUrl uri = query.value(0).toUrl();
+    // Station isn't cached yet
+    if(!station) {
+        // Fetch station from database
+        QSqlQuery query(this->db()->database());
+        query.prepare("SELECT "
+                      "uri, "
+                      "name, "
+                      "alternativeFR, "
+                      "alternativeNL, "
+                      "alternativeDE, "
+                      "alternativeEN, "
+                      "street, "
+                      "zip, "
+                      "city, "
+                      "countryCode, "
+                      "longitude, "
+                      "latitude, "
+                      "ticketVendingMachine, "
+                      "luggageLockers, "
+                      "freeParking, "
+                      "taxi, "
+                      "bicycleSpots, "
+                      "blueBike, "
+                      "bus, "
+                      "tram, "
+                      "metro, "
+                      "wheelchairAvailable, "
+                      "ramp, "
+                      "disabledParkingSpots, "
+                      "elevatedPlatform, "
+                      "escalatorUp, "
+                      "escalatorDown, "
+                      "elevatorPlatform, "
+                      "hearingAidSignal, "
+                      "salesOpenMonday, "
+                      "salesCloseMonday, "
+                      "salesOpenTuesday, "
+                      "salesCloseTuesday, "
+                      "salesOpenWednesday, "
+                      "salesCloseWednesday, "
+                      "salesOpenThursday, "
+                      "salesCloseThursday, "
+                      "salesOpenFriday, "
+                      "salesCloseFriday, "
+                      "salesOpenSaturday, "
+                      "salesCloseSaturday, "
+                      "salesOpenSunday, "
+                      "salesCloseSunday, "
+                      "avgStopTimes "
+                      "FROM stations "
+                      "WHERE uri = :uri");
+        query.bindValue(":uri", uri); // Match page URI's
+        this->db()->execute(query);
 
-        // Convert to QMap, check always if an alternative name if available. If not, insert to default one for that language.
-        QMap<QLocale::Language, QString> name;
-        QList<QLocale::Language> languages;
-        languages << QLocale::Language::C << QLocale::Language::French << QLocale::Language::Dutch << QLocale::Language::German << QLocale::Language::English;
-        qint16 i = 1; // CSV file: station names start at index 1
-        foreach(QLocale::Language language, languages) {
-            QString localizedName = query.value(i).toString();
-            QString defaultName = query.value(1).toString();
+        // Read result and create a new Station object
+        while (query.next())
+        {
+            // Using the field name in overload query.value(x) is less efficient then using indexes according to the Qt 5.6.3 docs
+            QUrl uri = query.value(0).toUrl();
 
-            if(localizedName.length() > 0) {
-                name.insert(language, localizedName);
+            // Convert to QMap, check always if an alternative name if available. If not, insert to default one for that language.
+            QMap<QLocale::Language, QString> name;
+            QList<QLocale::Language> languages;
+            languages << QLocale::Language::C << QLocale::Language::French << QLocale::Language::Dutch << QLocale::Language::German << QLocale::Language::English;
+            qint16 i = 1; // CSV file: station names start at index 1
+            foreach(QLocale::Language language, languages) {
+                QString localizedName = query.value(i).toString();
+                QString defaultName = query.value(1).toString();
+
+                if(localizedName.length() > 0) {
+                    name.insert(language, localizedName);
+                }
+                else {
+                    name.insert(language, defaultName);
+                }
+                i++;
+            }
+
+            // Convert country code to QLocale::Country enum
+            QLocale::Country country; // Unknown at first
+            QString countryCode = query.value(9).toString();
+            if(countryCode == "be") {
+                country = QLocale::Country::Belgium;
+            }
+            else if(countryCode == "nl") {
+                country = QLocale::Country::Netherlands;
+            }
+            else if(countryCode == "gb") {
+                country = QLocale::Country::UnitedKingdom;
+            }
+            else if(countryCode =="lu") {
+                country = QLocale::Country::Luxembourg;
+            }
+            else if(countryCode == "ch") {
+                country = QLocale::Country::Switzerland;
+            }
+            else if(countryCode == "fr") {
+                country = QLocale::Country::France;
+            }
+            else if(countryCode == "de") {
+                country = QLocale::Country::Germany;
             }
             else {
-                name.insert(language, defaultName);
+                country = QLocale::Country::Belgium; // Qt lacks an unknown country enum
             }
-            i++;
-        }
 
-        // Convert country code to QLocale::Country enum
-        QLocale::Country country; // Unknown at first
-        QString countryCode = query.value(9).toString();
-        if(countryCode == "be") {
-            country = QLocale::Country::Belgium;
-        }
-        else if(countryCode == "nl") {
-            country = QLocale::Country::Netherlands;
-        }
-        else if(countryCode == "gb") {
-            country = QLocale::Country::UnitedKingdom;
-        }
-        else if(countryCode =="lu") {
-            country = QLocale::Country::Luxembourg;
-        }
-        else if(countryCode == "ch") {
-            country = QLocale::Country::Switzerland;
-        }
-        else if(countryCode == "fr") {
-            country = QLocale::Country::France;
-        }
-        else if(countryCode == "de") {
-            country = QLocale::Country::Germany;
-        }
-        else {
-            country = QLocale::Country::Belgium; // Qt lacks an unknown country enum
-        }
+            // Convert latitude and longitude to QGeoCoordinate
+            QGeoCoordinate position;
+            position.setLongitude(query.value(10).toDouble());
+            position.setLatitude(query.value(11).toDouble());
 
-        // Convert latitude and longitude to QGeoCoordinate
-        QGeoCoordinate position;
-        position.setLongitude(query.value(10).toDouble());
-        position.setLatitude(query.value(11).toDouble());
+            qreal averageStopTimes = query.value(43).toDouble();
 
-        qreal averageStopTimes = query.value(43).toDouble();
+            // Only process the following fields if any facility data is available
+            // We check this by looking at the full address of the station, if that's missing then probably all the rest of the data will be missing too.
+            bool hasFacilities = query.value(6).toString().length() > 0 && query.value(7).toString().length() > 0 && query.value(8).toString().length() > 0;
+            if(hasFacilities) {
+                // Convert street, zip and city to QGeoAddress
+                QGeoAddress address;
+                address.setStreet(query.value(6).toString());
+                address.setPostalCode(query.value(7).toString());
+                address.setCity(query.value(8).toString());
 
-        // Only process the following fields if any facility data is available
-        // We check this by looking at the full address of the station, if that's missing then probably all the rest of the data will be missing too.
-        bool hasFacilities = query.value(6).toString().length() > 0 && query.value(7).toString().length() > 0 && query.value(8).toString().length() > 0;
-        if(hasFacilities) {
-            // Convert street, zip and city to QGeoAddress
-            QGeoAddress address;
-            address.setStreet(query.value(6).toString());
-            address.setPostalCode(query.value(7).toString());
-            address.setCity(query.value(8).toString());
+                bool hasTicketVendingMachine = query.value(12).toBool();
+                bool hasLuggageLockers = query.value(13).toBool();
+                bool hasFreeParking = query.value(14).toBool();
+                bool hasTaxi = query.value(15).toBool();
+                bool hasBicycleSpots = query.value(16).toBool();
+                bool hasBlueBike = query.value(17).toBool();
+                bool hasBus = query.value(18).toBool();
+                bool hasTram = query.value(19).toBool();
+                bool hasMetro = query.value(20).toBool();
+                bool hasWheelchairAvailable = query.value(21).toBool();
+                bool hasRamp = query.value(22).toBool();
+                qint16 disabledParkingSpots = query.value(23).toInt();
+                bool hasElevatedPlatform = query.value(24).toBool();
+                bool hasEscalatorUp = query.value(25).toBool();
+                bool hasEscalatorDown = query.value(26).toBool();
+                bool hasElevatorPlatform = query.value(27).toBool();
+                bool hasHearingAidSignal = query.value(28).toBool();
 
-            bool hasTicketVendingMachine = query.value(12).toBool();
-            bool hasLuggageLockers = query.value(13).toBool();
-            bool hasFreeParking = query.value(14).toBool();
-            bool hasTaxi = query.value(15).toBool();
-            bool hasBicycleSpots = query.value(16).toBool();
-            bool hasBlueBike = query.value(17).toBool();
-            bool hasBus = query.value(18).toBool();
-            bool hasTram = query.value(19).toBool();
-            bool hasMetro = query.value(20).toBool();
-            bool hasWheelchairAvailable = query.value(21).toBool();
-            bool hasRamp = query.value(22).toBool();
-            qint16 disabledParkingSpots = query.value(23).toInt();
-            bool hasElevatedPlatform = query.value(24).toBool();
-            bool hasEscalatorUp = query.value(25).toBool();
-            bool hasEscalatorDown = query.value(26).toBool();
-            bool hasElevatorPlatform = query.value(27).toBool();
-            bool hasHearingAidSignal = query.value(28).toBool();
+                // Convert openinghours to QMap
+                QMap<CSA::Station::Day, QPair<QTime, QTime>> openingHours; // Example: 06:45
+                openingHours.insert(CSA::Station::Day::MONDAY, QPair<QTime, QTime>(
+                                        QTime::fromString(query.value(29).toString(), "hh:mm"),
+                                        QTime::fromString(query.value(30).toString(), "hh:mm")
+                                        )
+                                    );
+                openingHours.insert(CSA::Station::Day::TUESDAY, QPair<QTime, QTime>(
+                                        QTime::fromString(query.value(31).toString(), "hh:mm"),
+                                        QTime::fromString(query.value(32).toString(), "hh:mm")
+                                        )
+                                    );
+                openingHours.insert(CSA::Station::Day::WEDNESDAY, QPair<QTime, QTime>(
+                                        QTime::fromString(query.value(33).toString(), "hh:mm"),
+                                        QTime::fromString(query.value(34).toString(), "hh:mm")
+                                        )
+                                    );
+                openingHours.insert(CSA::Station::Day::THURSDAY, QPair<QTime, QTime>(
+                                        QTime::fromString(query.value(35).toString(), "hh:mm"),
+                                        QTime::fromString(query.value(36).toString(), "hh:mm")
+                                        )
+                                    );
+                openingHours.insert(CSA::Station::Day::FRIDAY, QPair<QTime, QTime>(
+                                        QTime::fromString(query.value(37).toString(), "hh:mm"),
+                                        QTime::fromString(query.value(38).toString(), "hh:mm")
+                                        )
+                                    );
+                openingHours.insert(CSA::Station::Day::SATURDAY, QPair<QTime, QTime>(
+                                        QTime::fromString(query.value(39).toString(), "hh:mm"),
+                                        QTime::fromString(query.value(40).toString(), "hh:mm")
+                                        )
+                                    );
+                openingHours.insert(CSA::Station::Day::SUNDAY, QPair<QTime, QTime>(
+                                        QTime::fromString(query.value(41).toString(), "hh:mm"),
+                                        QTime::fromString(query.value(42).toString(), "hh:mm")
+                                        )
+                                    );
+                station  = new CSA::Station(uri,
+                                            name,
+                                            country,
+                                            position,
+                                            address,
+                                            hasTicketVendingMachine,
+                                            hasLuggageLockers,
+                                            hasFreeParking,
+                                            hasTaxi,
+                                            hasBicycleSpots,
+                                            hasBlueBike,
+                                            hasBus,
+                                            hasTram,
+                                            hasMetro,
+                                            hasWheelchairAvailable,
+                                            hasRamp,
+                                            disabledParkingSpots,
+                                            hasElevatedPlatform,
+                                            hasEscalatorUp,
+                                            hasEscalatorDown,
+                                            hasElevatorPlatform,
+                                            hasHearingAidSignal,
+                                            openingHours,
+                                            averageStopTimes,
+                                            nullptr);
+            }
+            else {
+                station = new CSA::Station(uri,
+                                           name,
+                                           country,
+                                           position,
+                                           averageStopTimes,
+                                           nullptr);
+            }
 
-            // Convert openinghours to QMap
-            QMap<CSA::Station::Day, QPair<QTime, QTime>> openingHours; // Example: 06:45
-            openingHours.insert(CSA::Station::Day::MONDAY, QPair<QTime, QTime>(
-                                    QTime::fromString(query.value(29).toString(), "hh:mm"),
-                                    QTime::fromString(query.value(30).toString(), "hh:mm")
-                                    )
-                                );
-            openingHours.insert(CSA::Station::Day::TUESDAY, QPair<QTime, QTime>(
-                                    QTime::fromString(query.value(31).toString(), "hh:mm"),
-                                    QTime::fromString(query.value(32).toString(), "hh:mm")
-                                    )
-                                );
-            openingHours.insert(CSA::Station::Day::WEDNESDAY, QPair<QTime, QTime>(
-                                    QTime::fromString(query.value(33).toString(), "hh:mm"),
-                                    QTime::fromString(query.value(34).toString(), "hh:mm")
-                                    )
-                                );
-            openingHours.insert(CSA::Station::Day::THURSDAY, QPair<QTime, QTime>(
-                                    QTime::fromString(query.value(35).toString(), "hh:mm"),
-                                    QTime::fromString(query.value(36).toString(), "hh:mm")
-                                    )
-                                );
-            openingHours.insert(CSA::Station::Day::FRIDAY, QPair<QTime, QTime>(
-                                    QTime::fromString(query.value(37).toString(), "hh:mm"),
-                                    QTime::fromString(query.value(38).toString(), "hh:mm")
-                                    )
-                                );
-            openingHours.insert(CSA::Station::Day::SATURDAY, QPair<QTime, QTime>(
-                                    QTime::fromString(query.value(39).toString(), "hh:mm"),
-                                    QTime::fromString(query.value(40).toString(), "hh:mm")
-                                    )
-                                );
-            openingHours.insert(CSA::Station::Day::SUNDAY, QPair<QTime, QTime>(
-                                    QTime::fromString(query.value(41).toString(), "hh:mm"),
-                                    QTime::fromString(query.value(42).toString(), "hh:mm")
-                                    )
-                                );
-            station  = new CSA::Station(uri,
-                                      name,
-                                      country,
-                                      position,
-                                      address,
-                                      hasTicketVendingMachine,
-                                      hasLuggageLockers,
-                                      hasFreeParking,
-                                      hasTaxi,
-                                      hasBicycleSpots,
-                                      hasBlueBike,
-                                      hasBus,
-                                      hasTram,
-                                      hasMetro,
-                                      hasWheelchairAvailable,
-                                      hasRamp,
-                                      disabledParkingSpots,
-                                      hasElevatedPlatform,
-                                      hasEscalatorUp,
-                                      hasEscalatorDown,
-                                      hasElevatorPlatform,
-                                      hasHearingAidSignal,
-                                      openingHours,
-                                      averageStopTimes,
-                                      nullptr);
+            // Add station to cache
+            this->addStationToCache(station);
         }
-        else {
-            station = new CSA::Station(uri,
-                                     name,
-                                     country,
-                                     position,
-                                     averageStopTimes,
-                                     nullptr);
-        }
-
-        // Only 1 station can be found since the URI is the PRIMARY KEY of the SQL table
-        return station;
+    }
+    else {
+        qDebug() << "Station" << uri.toString() << "found in cache.";
     }
 
-    // Make compiler happy
-    return nullptr;
+    return station;
 }
 
 /**
@@ -321,51 +330,51 @@ bool CSA::StationFactory::initDatabase()
 
     // STATIONS table
     success = query.prepare("CREATE TABLE IF NOT EXISTS stations ("
-                                 "uri TEXT PRIMARY KEY, "
-                                 "name TEXT NOT NULL, "
-                                 "alternativeFR TEXT, "
-                                 "alternativeNL TEXT, "
-                                 "alternativeDE TEXT, "
-                                 "alternativeEN TEXT, "
-                                 "street TEXT, "
-                                 "zip INT, "
-                                 "city TEXT, "
-                                 "countryCode TEXT, "
-                                 "longitude REAL, "
-                                 "latitude REAL, "
-                                 "ticketVendingMachine TEXT, "
-                                 "luggageLockers INT, "
-                                 "freeParking INT, "
-                                 "taxi INT, "
-                                 "bicycleSpots INT, "
-                                 "blueBike INT, "
-                                 "bus INT, "
-                                 "tram INT, "
-                                 "metro INT, "
-                                 "wheelchairAvailable INT, "
-                                 "ramp INT, "
-                                 "disabledParkingSpots INT, "
-                                 "elevatedPlatform INT, "
-                                 "escalatorUp INT, "
-                                 "escalatorDown INT, "
-                                 "elevatorPlatform INT, "
-                                 "hearingAidSignal INT, "
-                                 "salesOpenMonday TEXT, "
-                                 "salesCloseMonday TEXT, "
-                                 "salesOpenTuesday TEXT, "
-                                 "salesCloseTuesday TEXT, "
-                                 "salesOpenWednesday TEXT, "
-                                 "salesCloseWednesday TEXT, "
-                                 "salesOpenThursday TEXT, "
-                                 "salesCloseThursday TEXT, "
-                                 "salesOpenFriday TEXT, "
-                                 "salesCloseFriday TEXT, "
-                                 "salesOpenSaturday TEXT, "
-                                 "salesCloseSaturday TEXT, "
-                                 "salesOpenSunday TEXT, "
-                                 "salesCloseSunday TEXT, "
-                                 "avgStopTimes REAL)"
-                                 );
+                            "uri TEXT PRIMARY KEY, "
+                            "name TEXT NOT NULL, "
+                            "alternativeFR TEXT, "
+                            "alternativeNL TEXT, "
+                            "alternativeDE TEXT, "
+                            "alternativeEN TEXT, "
+                            "street TEXT, "
+                            "zip INT, "
+                            "city TEXT, "
+                            "countryCode TEXT, "
+                            "longitude REAL, "
+                            "latitude REAL, "
+                            "ticketVendingMachine TEXT, "
+                            "luggageLockers INT, "
+                            "freeParking INT, "
+                            "taxi INT, "
+                            "bicycleSpots INT, "
+                            "blueBike INT, "
+                            "bus INT, "
+                            "tram INT, "
+                            "metro INT, "
+                            "wheelchairAvailable INT, "
+                            "ramp INT, "
+                            "disabledParkingSpots INT, "
+                            "elevatedPlatform INT, "
+                            "escalatorUp INT, "
+                            "escalatorDown INT, "
+                            "elevatorPlatform INT, "
+                            "hearingAidSignal INT, "
+                            "salesOpenMonday TEXT, "
+                            "salesCloseMonday TEXT, "
+                            "salesOpenTuesday TEXT, "
+                            "salesCloseTuesday TEXT, "
+                            "salesOpenWednesday TEXT, "
+                            "salesCloseWednesday TEXT, "
+                            "salesOpenThursday TEXT, "
+                            "salesCloseThursday TEXT, "
+                            "salesOpenFriday TEXT, "
+                            "salesCloseFriday TEXT, "
+                            "salesOpenSaturday TEXT, "
+                            "salesCloseSaturday TEXT, "
+                            "salesOpenSunday TEXT, "
+                            "salesCloseSunday TEXT, "
+                            "avgStopTimes REAL)"
+                            );
     success = this->db()->execute(query);
     query.clear(); // Release resources for reuse
 
@@ -675,6 +684,44 @@ bool CSA::StationFactory::insertStopIntoDatabase(const QStringList &stop)
     query.bindValue(":name", stop.at(4));
     query.bindValue(":platform", stop.at(5));
     return this->db()->execute(query);
+}
+
+// Helpers
+/**
+ * @file csastationfactory.cpp
+ * @author Dylan Van Assche
+ * @date 09 Aug 2018
+ * @brief Tries to fetch a station from cache
+ * @return CSA::Station *station
+ * @package CSA
+ * @private
+ * @note If no station is found in the memory cache, a NULL pointer is returned.
+ * Tries to fetch a station from the memory cache and returns it.
+ */
+CSA::Station *CSA::StationFactory::fetchStationFromCache(const QUrl &uri) const
+{
+    if(m_cache.contains(uri)) {
+        return this->m_cache.value(uri);
+    }
+    else {
+        return nullptr;
+    }
+}
+
+/**
+ * @file csastationfactory.cpp
+ * @author Dylan Van Assche
+ * @date 09 Aug 2018
+ * @brief Adds a station to the cache
+ * @param CSA::Station *station
+ * @package CSA
+ * @private
+ * Adds a station to the memory cache to avoid duplicate CSA::Station objects.
+ * This also reduces the look up time for station (less heavy database operations).
+ */
+void CSA::StationFactory::addStationToCache(CSA::Station *station)
+{
+    this->m_cache.insert(station->uri(), station);
 }
 
 // Getters & Setters

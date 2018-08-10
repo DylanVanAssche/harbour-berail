@@ -26,6 +26,7 @@
 #include <QtCore/QStringList>
 #include <QtSql/QSqlQuery>
 #include "csastation.h"
+#include "csanullstation.h"
 #include "../../database/databasemanager.h"
 #include "../qtcsv/include/qtcsv/stringdata.h"
 #include "../qtcsv/include/qtcsv/reader.h"
@@ -43,10 +44,13 @@ public:
 
 private:
     Database::Manager *m_db;
+    QMap<QUrl, CSA::Station*> m_cache;
     bool initDatabase();
     bool insertStationWithFacilitiesIntoDatabase(const QStringList &station, const QStringList &facilities);
     bool insertStationWithoutFacilitiesIntoDatabase(const QStringList &station);
     bool insertStopIntoDatabase(const QStringList &stop);
+    CSA::Station *fetchStationFromCache(const QUrl &uri) const;
+    void addStationToCache(CSA::Station *station);
     Database::Manager *db() const;
     void setDb(Database::Manager *db);
     static CSA::StationFactory *m_instance;
