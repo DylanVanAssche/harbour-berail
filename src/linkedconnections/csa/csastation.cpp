@@ -47,8 +47,8 @@ CSA::Station::Station(QObject *parent)
  * @param const qreal &averageStopTimes
  * @param QObject *parent
  * @package CSA
- * @private
- * Constructs a CSA::NullStation according to the Null design pattern.
+ * @public
+ * Constructs a CSA::Station without facilities.
  */
 CSA::Station::Station(const QUrl &uri, const QMap<QLocale::Language, QString> &name, const QLocale::Country &country, const QGeoCoordinate &position, const qreal &averageStopTimes, QObject *parent) : QObject(parent)
 {
@@ -81,6 +81,7 @@ CSA::Station::Station(const QUrl &uri, const QMap<QLocale::Language, QString> &n
     m_hasHearingAidSignal = false;
     m_openingHours = QMap<CSA::Station::Day, QPair<QTime, QTime> >();
     m_averageStopTimes = averageStopTimes;
+    m_platforms = QList<QPair<QUrl, QString> >();
 }
 
 /**
@@ -113,8 +114,8 @@ CSA::Station::Station(const QUrl &uri, const QMap<QLocale::Language, QString> &n
  * @param const qreal &averageStopTimes
  * @param QObject *parent
  * @package CSA
- * @private
- * Constructs a CSA::NullStation according to the Null design pattern.
+ * @public
+ * Constructs a CSA::Station with facilities.
  */
 CSA::Station::Station(const QUrl &uri, const QMap<QLocale::Language, QString> &name, const QLocale::Country &country, const QGeoCoordinate &position, const QGeoAddress &address, const bool &hasTicketVendingMachine, const bool &hasLuggageLockers, const bool &hasFreeParking, const bool &hasTaxi, const bool &hasBicycleSpots, const bool &hasBlueBike, const bool &hasBus, const bool &hasTram, const bool &hasMetro, const bool &hasWheelchairAvailable, const bool &hasRamp, const qint16 &disabledParkingSpots, const bool &hasElevatedPlatform, const bool &hasEscalatorUp, const bool &hasEscalatorDown, const bool &hasElevatorPlatform, const bool &hasHearingAidSignal, const QMap<CSA::Station::Day, QPair<QTime, QTime> > &openingHours, const qreal &averageStopTimes, QObject *parent) : QObject(parent)
 {
@@ -146,6 +147,123 @@ CSA::Station::Station(const QUrl &uri, const QMap<QLocale::Language, QString> &n
     m_hasHearingAidSignal = hasHearingAidSignal;
     m_openingHours = openingHours;
     m_averageStopTimes = averageStopTimes;
+    m_platforms = QList<QPair<QUrl, QString> >();
+}
+
+/**
+ * @file csastation.cpp
+ * @author Dylan Van Assche
+ * @date 09 Aug 2018
+ * @brief CSA::Station constructor: minimal
+ * @param const QUrl &uri
+ * @param const QMap<QLocale::Language, QString> &name
+ * @param const QLocale::Country &country
+ * @param const QGeoCoordinate &position
+ * @param const qreal &averageStopTimes
+ * @param QObject *parent
+ * @package CSA
+ * @public
+ * Constructs a CSA::Station without facilities.
+ */
+CSA::Station::Station(const QUrl &uri, const QMap<QLocale::Language, QString> &name, const QLocale::Country &country, const QGeoCoordinate &position, const qreal &averageStopTimes, const QList<QPair<QUrl, QString> > &platforms, QObject *parent) : QObject(parent)
+{
+    // Clean up when parent dies
+    this->setParent(parent);
+
+    // Use private members to avoid signal firing on construction
+    // Unknown fields are set to a default value to avoid undefined references
+    m_uri = uri;
+    m_name = name;
+    m_country = country;
+    m_position = position;
+    m_address = QGeoAddress();
+    m_hasTicketVendingMachine = false;
+    m_hasLuggageLockers = false;
+    m_hasFreeParking = false;
+    m_hasTaxi = false;
+    m_hasBicycleSpots = false;
+    m_hasBlueBike = false;
+    m_hasBus = false;
+    m_hasTram = false;
+    m_hasMetro = false;
+    m_hasWheelchairAvailable = false;
+    m_hasRamp = false;
+    m_disabledParkingSpots = 0;
+    m_hasElevatedPlatform = false;
+    m_hasEscalatorUp = false;
+    m_hasEscalatorDown = false;
+    m_hasElevatorPlatform = false;
+    m_hasHearingAidSignal = false;
+    m_openingHours = QMap<CSA::Station::Day, QPair<QTime, QTime> >();
+    m_averageStopTimes = averageStopTimes;
+    m_platforms = platforms;
+}
+
+/**
+ * @file csastation.cpp
+ * @author Dylan Van Assche
+ * @date 09 Aug 2018
+ * @brief CSA::Station constructor: full
+ * @param const QUrl &uri
+ * @param const QMap<QLocale::Language, QString> &name
+ * @param const QLocale::Country &country
+ * @param const QGeoCoordinate &position
+ * @param const QGeoAddress &address
+ * @param const bool &hasTicketVendingMachine
+ * @param const bool &hasLuggageLockers
+ * @param const bool &hasFreeParking
+ * @param const bool &hasTaxi
+ * @param const bool &hasBicyclSpots
+ * @param const bool &hasBus
+ * @param const bool &hasTram
+ * @param const bool &hasMetro
+ * @param const bool &hasWheelchairAvailable
+ * @param const bool &hasRamp
+ * @param const qint16 &disabledParkingSpots
+ * @param const bool &hasElevatedPlatform
+ * @param const bool &hasEscalatorUp
+ * @param const bool &hasEscalatorDown
+ * @param const bool &hasElevatorPlatform
+ * @param const bool &hasHearingAidSignal
+ * @param const QMap<CSA::Station::Day, QPair<QTime, QTime>> &openingHours
+ * @param const QList<QPair<QUrl, QString> > &platforms
+ * @param const qreal &averageStopTimes
+ * @param QObject *parent
+ * @package CSA
+ * @public
+ * Constructs a CSA::Station with facilities and platforms.
+ */
+CSA::Station::Station(const QUrl &uri, const QMap<QLocale::Language, QString> &name, const QLocale::Country &country, const QGeoCoordinate &position, const QGeoAddress &address, const bool &hasTicketVendingMachine, const bool &hasLuggageLockers, const bool &hasFreeParking, const bool &hasTaxi, const bool &hasBicycleSpots, const bool &hasBlueBike, const bool &hasBus, const bool &hasTram, const bool &hasMetro, const bool &hasWheelchairAvailable, const bool &hasRamp, const qint16 &disabledParkingSpots, const bool &hasElevatedPlatform, const bool &hasEscalatorUp, const bool &hasEscalatorDown, const bool &hasElevatorPlatform, const bool &hasHearingAidSignal, const QMap<CSA::Station::Day, QPair<QTime, QTime> > &openingHours, const qreal &averageStopTimes, const QList<QPair<QUrl, QString> > &platforms, QObject *parent) : QObject(parent)
+{
+    // Clean up when parent dies
+    this->setParent(parent);
+
+    // Use private members to avoid signal firing on construction
+    m_uri = uri;
+    m_name = name;
+    m_country = country;
+    m_position = position;
+    m_address = address;
+    m_hasTicketVendingMachine = hasTicketVendingMachine;
+    m_hasLuggageLockers = hasLuggageLockers;
+    m_hasFreeParking = hasFreeParking;
+    m_hasTaxi = hasTaxi;
+    m_hasBicycleSpots = hasBicycleSpots;
+    m_hasBlueBike = hasBlueBike;
+    m_hasBus = hasBus;
+    m_hasTram = hasTram;
+    m_hasMetro = hasMetro;
+    m_hasWheelchairAvailable = hasWheelchairAvailable;
+    m_hasRamp = hasRamp;
+    m_disabledParkingSpots = disabledParkingSpots;
+    m_hasElevatedPlatform = hasElevatedPlatform;
+    m_hasEscalatorUp = hasEscalatorUp;
+    m_hasEscalatorDown = hasEscalatorDown;
+    m_hasElevatorPlatform = hasElevatorPlatform;
+    m_hasHearingAidSignal = hasHearingAidSignal;
+    m_openingHours = openingHours;
+    m_averageStopTimes = averageStopTimes;
+    m_platforms = platforms;
 }
 
 /**
@@ -895,4 +1013,36 @@ void CSA::Station::setAverageStopTimes(const qreal &averageStopTimes)
 {
     m_averageStopTimes = averageStopTimes;
     emit this->averageStopTimesChanged();
+}
+
+/**
+ * @file csastation.cpp
+ * @author Dylan Van Assche
+ * @date 09 Aug 2018
+ * @brief Gets the platforms for the station
+ * @package CSA
+ * @return const QList<QPair<QUrl, QString> > platforms
+ * @public
+ * Gets the platforms for the station and returns it.
+ */
+QList<QPair<QUrl, QString> > CSA::Station::platforms() const
+{
+    return m_platforms;
+}
+
+/**
+ * @file csastation.cpp
+ * @author Dylan Van Assche
+ * @date 09 Aug 2018
+ * @brief Sets platforms for the station
+ * @package CSA
+ * @param const QList<QPair<QUrl, QString> > &platforms
+ * @public
+ * Sets the platforms for the station to the given QList<QPair<QUrl, QString> > &platforms.
+ * Emits the platformsChanged signal.
+ */
+void CSA::Station::setPlatforms(const QList<QPair<QUrl, QString> > &platforms)
+{
+    m_platforms = platforms;
+    emit this->platformsChanged();
 }

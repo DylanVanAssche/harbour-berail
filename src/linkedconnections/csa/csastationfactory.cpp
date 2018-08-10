@@ -192,7 +192,11 @@ CSA::Station *CSA::StationFactory::getStationByURI(const QUrl &uri)
             position.setLongitude(query.value(10).toDouble());
             position.setLatitude(query.value(11).toDouble());
 
+            // Fetch the average stop times for this station
             qreal averageStopTimes = query.value(43).toDouble();
+
+            // Retrieve the platforms from this station
+            QList<QPair<QUrl, QString>> platforms = this->getPlatformsByStationURI(uri);
 
             // Only process the following fields if any facility data is available
             // We check this by looking at the full address of the station, if that's missing then probably all the rest of the data will be missing too.
@@ -259,6 +263,7 @@ CSA::Station *CSA::StationFactory::getStationByURI(const QUrl &uri)
                                         QTime::fromString(query.value(42).toString(), "hh:mm")
                                         )
                                     );
+
                 station  = new CSA::Station(uri,
                                             name,
                                             country,
@@ -283,7 +288,9 @@ CSA::Station *CSA::StationFactory::getStationByURI(const QUrl &uri)
                                             hasHearingAidSignal,
                                             openingHours,
                                             averageStopTimes,
-                                            nullptr);
+                                            platforms,
+                                            nullptr
+                                            );
             }
             else {
                 station = new CSA::Station(uri,
@@ -291,7 +298,9 @@ CSA::Station *CSA::StationFactory::getStationByURI(const QUrl &uri)
                                            country,
                                            position,
                                            averageStopTimes,
-                                           nullptr);
+                                           platforms,
+                                           nullptr
+                                           );
             }
 
             // Add station to cache
@@ -324,7 +333,7 @@ bool CSA::StationFactory::initDatabase()
     success = this->db()->execute(query);
     query.clear(); // Release resources for reuse
 
-    success = query.prepare("DROP TABLE IF EXISTS stops");
+    success = query.prepare("DROP TABLE IF EXISTS platforms");
     success = this->db()->execute(query);
     query.clear();
 
@@ -378,8 +387,8 @@ bool CSA::StationFactory::initDatabase()
     success = this->db()->execute(query);
     query.clear(); // Release resources for reuse
 
-    // STOPS table
-    success = query.prepare("CREATE TABLE IF NOT EXISTS stops ("
+    // PLATFORMS table
+    success = query.prepare("CREATE TABLE IF NOT EXISTS platforms ("
                             "uri TEXT PRIMARY KEY, "
                             "parentStop TEXT, "
                             "longitude REAL, "
@@ -439,17 +448,17 @@ bool CSA::StationFactory::initDatabase()
     }
 
     // Loop through the stops CSV file and insert every stop into the DB
-    foreach(QStringList stop, stopsCSV)
+    foreach(QStringList platform, stopsCSV)
     {
         // We remove the title line from the CSV
-        if(!QString(stop.at(0)).startsWith("http")) {
+        if(!QString(platform.at(0)).startsWith("http")) {
             continue;
         }
-        success = this->insertStopIntoDatabase(stop);
+        success = this->insertPlatformIntoDatabase(platform);
 
         // Return false when insertion fails
         if(!success) {
-            qCritical() << "Insertion failed for stop:" << stop.at(0);
+            qCritical() << "Insertion failed for stop:" << platform.at(0);
             break;
         }
     }
@@ -654,16 +663,16 @@ bool CSA::StationFactory::insertStationWithoutFacilitiesIntoDatabase(const QStri
  * @file csastationfactory.cpp
  * @author Dylan Van Assche
  * @date 09 Aug 2018
- * @brief Inserts a stop into the database
- * @param const QStringList &stop
+ * @brief Inserts a platform into the database
+ * @param const QStringList &platform
  * @package CSA
  * @public
- * Inserts a stop into the database from the CSV file.
+ * Inserts a platform into the database from the CSV file.
  */
-bool CSA::StationFactory::insertStopIntoDatabase(const QStringList &stop)
+bool CSA::StationFactory::insertPlatformIntoDatabase(const QStringList &platform)
 {
     QSqlQuery query(this->db()->database());
-    query.prepare("INSERT INTO stops ("
+    query.prepare("INSERT INTO platforms ("
                   "uri, "
                   "parentStop, "
                   "longitude, "
@@ -677,12 +686,12 @@ bool CSA::StationFactory::insertStopIntoDatabase(const QStringList &stop)
                   ":latitude, "
                   ":name, "
                   ":platform)");
-    query.bindValue(":uri", stop.at(0));
-    query.bindValue(":parentStop", stop.at(1));
-    query.bindValue(":longitude", stop.at(2));
-    query.bindValue(":latitude", stop.at(3));
-    query.bindValue(":name", stop.at(4));
-    query.bindValue(":platform", stop.at(5));
+    query.bindValue(":uri", platform.at(0));
+    query.bindValue(":parentStop", platform.at(1));
+    query.bindValue(":longitude", platform.at(2));
+    query.bindValue(":latitude", platform.at(3));
+    query.bindValue(":name", platform.at(4));
+    query.bindValue(":platform", platform.at(5));
     return this->db()->execute(query);
 }
 
@@ -722,6 +731,36 @@ CSA::Station *CSA::StationFactory::fetchStationFromCache(const QUrl &uri) const
 void CSA::StationFactory::addStationToCache(CSA::Station *station)
 {
     this->m_cache.insert(station->uri(), station);
+}
+
+QList<QPair<QUrl, QString>> CSA::StationFactory::getPlatformsByStationURI(const QUrl &uri)
+{
+    // Fetch station from database
+    QSqlQuery query(this->db()->database());
+    query.prepare("SELECT "
+                  "uri, "
+                  "parentStop, "
+                  "platform "
+                  "FROM platforms "
+                  "WHERE parentStop = :parentStop");
+    query.bindValue(":parentStop", uri);
+    this->db()->execute(query);
+
+    // Read result and create a new Station object
+    QList<QPair<QUrl, QString>> platformList = QList<QPair<QUrl, QString>>();
+
+    while (query.next())
+    {
+        qDebug() << "STOP URI=" << query.value(0);
+        platformList.append(
+                    qMakePair(
+                        query.value(0), // Platform URI
+                        query.value(2) // Platform name
+                        )
+                    );
+    }
+
+    return platformList;
 }
 
 // Getters & Setters

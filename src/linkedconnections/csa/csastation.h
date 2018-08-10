@@ -83,6 +83,43 @@ public:
             const QMap<CSA::Station::Day, QPair<QTime, QTime>> &openingHours,
             const qreal &averageStopTimes,
             QObject *parent = nullptr);
+    // Without facilities and platforms
+    explicit Station(
+            const QUrl &uri,
+            const QMap<QLocale::Language, QString> &name,
+            const QLocale::Country &country,
+            const QGeoCoordinate &position,
+            const qreal &averageStopTimes,
+            const QList<QPair<QUrl, QString> > &platforms,
+            QObject *parent = nullptr);
+    // With facilities and platforms
+    explicit Station(
+            const QUrl &uri,
+            const QMap<QLocale::Language, QString> &name,
+            const QLocale::Country &country,
+            const QGeoCoordinate &position,
+            const QGeoAddress &address,
+            const bool &hasTicketVendingMachine,
+            const bool &hasLuggageLockers,
+            const bool &hasFreeParking,
+            const bool &hasTaxi,
+            const bool &hasBicycleSpots,
+            const bool &hasBlueBike,
+            const bool &hasBus,
+            const bool &hasTram,
+            const bool &hasMetro,
+            const bool &hasWheelchairAvailable,
+            const bool &hasRamp,
+            const qint16 &disabledParkingSpots,
+            const bool &hasElevatedPlatform,
+            const bool &hasEscalatorUp,
+            const bool &hasEscalatorDown,
+            const bool &hasElevatorPlatform,
+            const bool &hasHearingAidSignal,
+            const QMap<CSA::Station::Day, QPair<QTime, QTime>> &openingHours,
+            const qreal &averageStopTimes,
+            const QList<QPair<QUrl, QString> > &platforms,
+            QObject *parent = nullptr);
     QUrl uri() const;
     void setUri(const QUrl &uri);
     QMap<QLocale::Language, QString> name() const;
@@ -131,6 +168,8 @@ public:
     void setOpeningHours(const QMap<CSA::Station::Day, QPair<QTime, QTime> > &openingHours);
     qreal averageStopTimes() const;
     void setAverageStopTimes(const qreal &averageStopTimes);
+    QList<QPair<QUrl, QString> > platforms() const;
+    void setPlatforms(const QList<QPair<QUrl, QString> > &platforms);
 
 signals:
     void uriChanged();
@@ -156,6 +195,7 @@ signals:
     void hasHearingAidSignalChanged();
     void openingHoursChanged();
     void averageStopTimesChanged();
+    void platformsChanged();
 
 private:
     QUrl m_uri;
@@ -182,6 +222,7 @@ private:
     bool m_hasHearingAidSignal;
     QMap<CSA::Station::Day, QPair<QTime, QTime>> m_openingHours;
     qreal m_averageStopTimes;
+    QList<QPair<QUrl, QString>> m_platforms;
 
     Q_ENUM(Day)
 };
