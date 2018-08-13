@@ -90,7 +90,7 @@ public:
             const QLocale::Country &country,
             const QGeoCoordinate &position,
             const qreal &averageStopTimes,
-            const QList<QPair<QUrl, QString> > &platforms,
+            const QMap<QUrl, QString> &platforms,
             QObject *parent = nullptr);
     // With facilities and platforms
     explicit Station(
@@ -118,7 +118,7 @@ public:
             const bool &hasHearingAidSignal,
             const QMap<CSA::Station::Day, QPair<QTime, QTime>> &openingHours,
             const qreal &averageStopTimes,
-            const QList<QPair<QUrl, QString> > &platforms,
+            const QMap<QUrl, QString> &platforms,
             QObject *parent = nullptr);
     QUrl uri() const;
     void setUri(const QUrl &uri);
@@ -168,8 +168,8 @@ public:
     void setOpeningHours(const QMap<CSA::Station::Day, QPair<QTime, QTime> > &openingHours);
     qreal averageStopTimes() const;
     void setAverageStopTimes(const qreal &averageStopTimes);
-    QList<QPair<QUrl, QString> > platforms() const;
-    void setPlatforms(const QList<QPair<QUrl, QString> > &platforms);
+    QMap<QUrl, QString> platforms() const;
+    void setPlatforms(const QMap<QUrl, QString> &platforms);
 
 signals:
     void uriChanged();
@@ -222,7 +222,7 @@ private:
     bool m_hasHearingAidSignal;
     QMap<CSA::Station::Day, QPair<QTime, QTime>> m_openingHours;
     qreal m_averageStopTimes;
-    QList<QPair<QUrl, QString>> m_platforms;
+    QMap<QUrl, QString> m_platforms;
 
     Q_ENUM(Day)
 };

@@ -196,7 +196,7 @@ CSA::Station *CSA::StationFactory::getStationByURI(const QUrl &uri)
             qreal averageStopTimes = query.value(43).toDouble();
 
             // Retrieve the platforms from this station
-            QList<QPair<QUrl, QString>> platforms = this->getPlatformsByStationURI(uri);
+            QMap<QUrl, QString> platforms = this->getPlatformsByStationURI(uri);
 
             // Only process the following fields if any facility data is available
             // We check this by looking at the full address of the station, if that's missing then probably all the rest of the data will be missing too.
@@ -733,9 +733,9 @@ void CSA::StationFactory::addStationToCache(CSA::Station *station)
     this->m_cache.insert(station->uri(), station);
 }
 
-QList<QPair<QUrl, QString>> CSA::StationFactory::getPlatformsByStationURI(const QUrl &uri)
+QMap<QUrl, QString> CSA::StationFactory::getPlatformsByStationURI(const QUrl &uri)
 {
-    // Fetch station from database
+    // Fetch platforms from database for a specific station URI.
     QSqlQuery query(this->db()->database());
     query.prepare("SELECT "
                   "uri, "
@@ -746,17 +746,15 @@ QList<QPair<QUrl, QString>> CSA::StationFactory::getPlatformsByStationURI(const 
     query.bindValue(":parentStop", uri);
     this->db()->execute(query);
 
-    // Read result and create a new Station object
-    QList<QPair<QUrl, QString>> platformList = QList<QPair<QUrl, QString>>();
+    // Read result and add the platforms to a QMap with their URI as ID.
+    QMap<QUrl, QString> platformList = QMap<QUrl, QString>();
 
     while (query.next())
     {
         qDebug() << "STOP URI=" << query.value(0);
-        platformList.append(
-                    qMakePair(
-                        query.value(0), // Platform URI
-                        query.value(2) // Platform name
-                        )
+        platformList.insert(
+                    query.value(0).toUrl(), // Platform URI
+                    query.value(2).toString() // Platform name
                     );
     }
 

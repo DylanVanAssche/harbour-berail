@@ -81,7 +81,7 @@ CSA::Station::Station(const QUrl &uri, const QMap<QLocale::Language, QString> &n
     m_hasHearingAidSignal = false;
     m_openingHours = QMap<CSA::Station::Day, QPair<QTime, QTime> >();
     m_averageStopTimes = averageStopTimes;
-    m_platforms = QList<QPair<QUrl, QString> >();
+    m_platforms = QMap<QUrl, QString>();
 }
 
 /**
@@ -147,7 +147,7 @@ CSA::Station::Station(const QUrl &uri, const QMap<QLocale::Language, QString> &n
     m_hasHearingAidSignal = hasHearingAidSignal;
     m_openingHours = openingHours;
     m_averageStopTimes = averageStopTimes;
-    m_platforms = QList<QPair<QUrl, QString> >();
+    m_platforms = QMap<QUrl, QString>();
 }
 
 /**
@@ -165,7 +165,7 @@ CSA::Station::Station(const QUrl &uri, const QMap<QLocale::Language, QString> &n
  * @public
  * Constructs a CSA::Station without facilities.
  */
-CSA::Station::Station(const QUrl &uri, const QMap<QLocale::Language, QString> &name, const QLocale::Country &country, const QGeoCoordinate &position, const qreal &averageStopTimes, const QList<QPair<QUrl, QString> > &platforms, QObject *parent) : QObject(parent)
+CSA::Station::Station(const QUrl &uri, const QMap<QLocale::Language, QString> &name, const QLocale::Country &country, const QGeoCoordinate &position, const qreal &averageStopTimes, const QMap<QUrl, QString> &platforms, QObject *parent) : QObject(parent)
 {
     // Clean up when parent dies
     this->setParent(parent);
@@ -233,7 +233,7 @@ CSA::Station::Station(const QUrl &uri, const QMap<QLocale::Language, QString> &n
  * @public
  * Constructs a CSA::Station with facilities and platforms.
  */
-CSA::Station::Station(const QUrl &uri, const QMap<QLocale::Language, QString> &name, const QLocale::Country &country, const QGeoCoordinate &position, const QGeoAddress &address, const bool &hasTicketVendingMachine, const bool &hasLuggageLockers, const bool &hasFreeParking, const bool &hasTaxi, const bool &hasBicycleSpots, const bool &hasBlueBike, const bool &hasBus, const bool &hasTram, const bool &hasMetro, const bool &hasWheelchairAvailable, const bool &hasRamp, const qint16 &disabledParkingSpots, const bool &hasElevatedPlatform, const bool &hasEscalatorUp, const bool &hasEscalatorDown, const bool &hasElevatorPlatform, const bool &hasHearingAidSignal, const QMap<CSA::Station::Day, QPair<QTime, QTime> > &openingHours, const qreal &averageStopTimes, const QList<QPair<QUrl, QString> > &platforms, QObject *parent) : QObject(parent)
+CSA::Station::Station(const QUrl &uri, const QMap<QLocale::Language, QString> &name, const QLocale::Country &country, const QGeoCoordinate &position, const QGeoAddress &address, const bool &hasTicketVendingMachine, const bool &hasLuggageLockers, const bool &hasFreeParking, const bool &hasTaxi, const bool &hasBicycleSpots, const bool &hasBlueBike, const bool &hasBus, const bool &hasTram, const bool &hasMetro, const bool &hasWheelchairAvailable, const bool &hasRamp, const qint16 &disabledParkingSpots, const bool &hasElevatedPlatform, const bool &hasEscalatorUp, const bool &hasEscalatorDown, const bool &hasElevatorPlatform, const bool &hasHearingAidSignal, const QMap<CSA::Station::Day, QPair<QTime, QTime> > &openingHours, const qreal &averageStopTimes, const QMap<QUrl, QString> &platforms, QObject *parent) : QObject(parent)
 {
     // Clean up when parent dies
     this->setParent(parent);
@@ -1021,11 +1021,11 @@ void CSA::Station::setAverageStopTimes(const qreal &averageStopTimes)
  * @date 09 Aug 2018
  * @brief Gets the platforms for the station
  * @package CSA
- * @return const QList<QPair<QUrl, QString> > platforms
+ * @return const QMap<QUrl, QString> platforms
  * @public
  * Gets the platforms for the station and returns it.
  */
-QList<QPair<QUrl, QString> > CSA::Station::platforms() const
+QMap<QUrl, QString> CSA::Station::platforms() const
 {
     return m_platforms;
 }
@@ -1036,12 +1036,12 @@ QList<QPair<QUrl, QString> > CSA::Station::platforms() const
  * @date 09 Aug 2018
  * @brief Sets platforms for the station
  * @package CSA
- * @param const QList<QPair<QUrl, QString> > &platforms
+ * @param const QMap<QUrl, QString> &platforms
  * @public
- * Sets the platforms for the station to the given QList<QPair<QUrl, QString> > &platforms.
+ * Sets the platforms for the station to the given QMap<QUrl, QString> &platforms.
  * Emits the platformsChanged signal.
  */
-void CSA::Station::setPlatforms(const QList<QPair<QUrl, QString> > &platforms)
+void CSA::Station::setPlatforms(const QMap<QUrl, QString> &platforms)
 {
     m_platforms = platforms;
     emit this->platformsChanged();

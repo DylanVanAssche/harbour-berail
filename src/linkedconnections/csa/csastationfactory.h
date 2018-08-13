@@ -24,6 +24,8 @@
 #include <QtCore/QString>
 #include <QtCore/QList>
 #include <QtCore/QStringList>
+#include <QtCore/QUrl>
+#include <QtCore/QMap>
 #include <QtSql/QSqlQuery>
 #include "csastation.h"
 #include "csanullstation.h"
@@ -51,7 +53,7 @@ private:
     bool insertPlatformIntoDatabase(const QStringList &stop);
     CSA::Station *fetchStationFromCache(const QUrl &uri) const;
     void addStationToCache(CSA::Station *station);
-    QList<QPair<QUrl, QString>> getPlatformsByStationURI(const QUrl &uri);
+    QMap<QUrl, QString> getPlatformsByStationURI(const QUrl &uri);
     Database::Manager *db() const;
     void setDb(Database::Manager *db);
     static CSA::StationFactory *m_instance;
