@@ -727,12 +727,26 @@ CSA::Station *CSA::StationFactory::fetchStationFromCache(const QUrl &uri) const
  * @private
  * Adds a station to the memory cache to avoid duplicate CSA::Station objects.
  * This also reduces the look up time for station (less heavy database operations).
+ *
+ * BENCHMARK: Jolla 1 saves 400-500 ms by using this caching method for a single routing calculation.
  */
 void CSA::StationFactory::addStationToCache(CSA::Station *station)
 {
     this->m_cache.insert(station->uri(), station);
 }
 
+/**
+ * @file csastationfactory.cpp
+ * @author Dylan Van Assche
+ * @date 13 Aug 2018
+ * @brief Fetches the platforms of a station
+ * @param const QUrl &uri
+ * @return const QMap<QUrl, QString> platformsMap
+ * @package CSA
+ * @private
+ * Fetches the platforms of a station by URI from the database.
+ * The platforms are added in a QMap and returned.
+ */
 QMap<QUrl, QString> CSA::StationFactory::getPlatformsByStationURI(const QUrl &uri)
 {
     // Fetch platforms from database for a specific station URI.
@@ -747,18 +761,17 @@ QMap<QUrl, QString> CSA::StationFactory::getPlatformsByStationURI(const QUrl &ur
     this->db()->execute(query);
 
     // Read result and add the platforms to a QMap with their URI as ID.
-    QMap<QUrl, QString> platformList = QMap<QUrl, QString>();
+    QMap<QUrl, QString> platformsMap = QMap<QUrl, QString>();
 
     while (query.next())
     {
-        qDebug() << "STOP URI=" << query.value(0);
-        platformList.insert(
+        platformsMap.insert(
                     query.value(0).toUrl(), // Platform URI
                     query.value(2).toString() // Platform name
                     );
     }
 
-    return platformList;
+    return platformsMap;
 }
 
 // Getters & Setters
