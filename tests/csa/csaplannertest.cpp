@@ -101,10 +101,5 @@ void CSA::PlannerTest::processRouteFound(const QList<CSA::Route *> &routes)
                 QFAIL("Transfer object is INVALID");
             }
         }
-
-        // Verify if the transfer stations are allowed for this trip
-        foreach(QString station, retrievedTransferStations) {
-            //QVERIFY2(possibleTransferStations.contains(station), "Transfer station not known for this trip");
-        }
     }
 }
