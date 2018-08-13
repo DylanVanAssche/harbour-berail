@@ -136,7 +136,7 @@ CSA::Station *CSA::StationFactory::getStationByURI(const QUrl &uri)
         this->db()->execute(query);
 
         // Read result and create a new Station object
-        while (query.next())
+        while(query.next())
         {
             // Using the field name in overload query.value(x) is less efficient then using indexes according to the Qt 5.6.3 docs
             QUrl uri = query.value(0).toUrl();
@@ -184,7 +184,7 @@ CSA::Station *CSA::StationFactory::getStationByURI(const QUrl &uri)
                 country = QLocale::Country::Germany;
             }
             else {
-                country = QLocale::Country::Belgium; // Qt lacks an unknown country enum
+                country = QLocale::Country::Belgium; // Qt 5.6 lacks an unknown country enum
             }
 
             // Convert latitude and longitude to QGeoCoordinate
@@ -195,7 +195,7 @@ CSA::Station *CSA::StationFactory::getStationByURI(const QUrl &uri)
             // Fetch the average stop times for this station
             qreal averageStopTimes = query.value(43).toDouble();
 
-            // Retrieve the platforms from this station
+            // Get the platform data for this station
             QMap<QUrl, QString> platforms = this->getPlatformsByStationURI(uri);
 
             // Only process the following fields if any facility data is available
@@ -264,33 +264,33 @@ CSA::Station *CSA::StationFactory::getStationByURI(const QUrl &uri)
                                         )
                                     );
 
-                station  = new CSA::Station(uri,
-                                            name,
-                                            country,
-                                            position,
-                                            address,
-                                            hasTicketVendingMachine,
-                                            hasLuggageLockers,
-                                            hasFreeParking,
-                                            hasTaxi,
-                                            hasBicycleSpots,
-                                            hasBlueBike,
-                                            hasBus,
-                                            hasTram,
-                                            hasMetro,
-                                            hasWheelchairAvailable,
-                                            hasRamp,
-                                            disabledParkingSpots,
-                                            hasElevatedPlatform,
-                                            hasEscalatorUp,
-                                            hasEscalatorDown,
-                                            hasElevatorPlatform,
-                                            hasHearingAidSignal,
-                                            openingHours,
-                                            averageStopTimes,
-                                            platforms,
-                                            nullptr
-                                            );
+                station = new CSA::Station(uri,
+                                           name,
+                                           country,
+                                           position,
+                                           address,
+                                           hasTicketVendingMachine,
+                                           hasLuggageLockers,
+                                           hasFreeParking,
+                                           hasTaxi,
+                                           hasBicycleSpots,
+                                           hasBlueBike,
+                                           hasBus,
+                                           hasTram,
+                                           hasMetro,
+                                           hasWheelchairAvailable,
+                                           hasRamp,
+                                           disabledParkingSpots,
+                                           hasElevatedPlatform,
+                                           hasEscalatorUp,
+                                           hasEscalatorDown,
+                                           hasElevatorPlatform,
+                                           hasHearingAidSignal,
+                                           openingHours,
+                                           averageStopTimes,
+                                           platforms,
+                                           nullptr
+                                           );
             }
             else {
                 station = new CSA::Station(uri,
@@ -414,6 +414,9 @@ bool CSA::StationFactory::initDatabase()
     QList<QStringList> facilitiesCSV = QtCSV::Reader::readToList("/home/nemo/.local/share/harbour-berail/csv/facilities.csv");
     QList<QStringList> stopsCSV = QtCSV::Reader::readToList("/home/nemo/.local/share/harbour-berail/csv/stops.csv");
 
+    // Synchronise all QFutures at the end of the transaction
+    QFutureSynchronizer<bool> synchronizer;
+
     // Loop through the stations CSV file and insert every station into the DB
     foreach(QStringList station, stationsCSV)
     {
@@ -433,17 +436,11 @@ bool CSA::StationFactory::initDatabase()
 
         // Only when we have an URI match between the facilitiesCSV and stationsCSV we can create a complete Station object
         if(facilityIndex > 0) {
-            success = this->insertStationWithFacilitiesIntoDatabase(station, facilitiesCSV.at(facilityIndex));
+            synchronizer.addFuture(this->insertStationWithFacilitiesIntoDatabase(station, facilitiesCSV.at(facilityIndex)));
         }
         else {
             //qWarning() << "No facilties found for station:" << station.at(0);
-            success = this->insertStationWithoutFacilitiesIntoDatabase(station);
-        }
-
-        // Return false when insertion fails
-        if(!success) {
-            qCritical() << "Insertion failed for station:" << station.at(0);
-            break;
+            synchronizer.addFuture(this->insertStationWithoutFacilitiesIntoDatabase(station));
         }
     }
 
@@ -454,16 +451,19 @@ bool CSA::StationFactory::initDatabase()
         if(!QString(platform.at(0)).startsWith("http")) {
             continue;
         }
-        success = this->insertPlatformIntoDatabase(platform);
+        synchronizer.addFuture(this->insertPlatformIntoDatabase(platform));
+    }
 
-        // Return false when insertion fails
+    // Insertion complete, synchronize everything and end the transaction
+    foreach(QFuture<bool> future, synchronizer.futures())
+    {
+        success = future.result();
         if(!success) {
-            qCritical() << "Insertion failed for stop:" << platform.at(0);
+            qCritical() << "Insertion failed";
+            synchronizer.waitForFinished(); // Wait in case we have a failed insertion for the rest of the QFutures
             break;
         }
     }
-
-    // Insetion complete, end the transaction
     this->db()->endTransaction();
 
     return success;
@@ -480,7 +480,7 @@ bool CSA::StationFactory::initDatabase()
  * @public
  * Inserts a station with facilities into the database from the CSV file.
  */
-bool CSA::StationFactory::insertStationWithFacilitiesIntoDatabase(const QStringList &station, const QStringList &facilities)
+QFuture<bool> CSA::StationFactory::insertStationWithFacilitiesIntoDatabase(const QStringList &station, const QStringList &facilities)
 {
     QSqlQuery query(this->db()->database());
     query.prepare("INSERT INTO stations ("
@@ -617,7 +617,7 @@ bool CSA::StationFactory::insertStationWithFacilitiesIntoDatabase(const QStringL
     query.bindValue(":salesOpenSunday", facilities.at(34));
     query.bindValue(":salesCloseSunday", facilities.at(35));
     query.bindValue(":avgStopTimes", station.at(9));
-    return this->db()->execute(query);
+    return this->db()->executeAsync(query);
 }
 
 /**
@@ -630,7 +630,7 @@ bool CSA::StationFactory::insertStationWithFacilitiesIntoDatabase(const QStringL
  * @public
  * Inserts a station without facilities into the database from the CSV file.
  */
-bool CSA::StationFactory::insertStationWithoutFacilitiesIntoDatabase(const QStringList &station)
+QFuture<bool> CSA::StationFactory::insertStationWithoutFacilitiesIntoDatabase(const QStringList &station)
 {
     QSqlQuery query(this->db()->database());
     query.prepare("INSERT INTO stations ("
@@ -656,7 +656,7 @@ bool CSA::StationFactory::insertStationWithoutFacilitiesIntoDatabase(const QStri
     query.bindValue(":alternativeDE", station.at(4));
     query.bindValue(":alternativeEN", station.at(5));
     query.bindValue(":avgStopTimes", station.at(9));
-    return this->db()->execute(query);
+    return this->db()->executeAsync(query);
 }
 
 /**
@@ -669,7 +669,7 @@ bool CSA::StationFactory::insertStationWithoutFacilitiesIntoDatabase(const QStri
  * @public
  * Inserts a platform into the database from the CSV file.
  */
-bool CSA::StationFactory::insertPlatformIntoDatabase(const QStringList &platform)
+QFuture<bool> CSA::StationFactory::insertPlatformIntoDatabase(const QStringList &platform)
 {
     QSqlQuery query(this->db()->database());
     query.prepare("INSERT INTO platforms ("
@@ -692,7 +692,7 @@ bool CSA::StationFactory::insertPlatformIntoDatabase(const QStringList &platform
     query.bindValue(":latitude", platform.at(3));
     query.bindValue(":name", platform.at(4));
     query.bindValue(":platform", platform.at(5));
-    return this->db()->execute(query);
+    return this->db()->executeAsync(query);
 }
 
 // Helpers
@@ -763,7 +763,7 @@ QMap<QUrl, QString> CSA::StationFactory::getPlatformsByStationURI(const QUrl &ur
     // Read result and add the platforms to a QMap with their URI as ID.
     QMap<QUrl, QString> platformsMap = QMap<QUrl, QString>();
 
-    while (query.next())
+    while(query.next())
     {
         platformsMap.insert(
                     query.value(0).toUrl(), // Platform URI

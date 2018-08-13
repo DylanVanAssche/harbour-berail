@@ -48,9 +48,9 @@ private:
     Database::Manager *m_db;
     QMap<QUrl, CSA::Station*> m_cache;
     bool initDatabase();
-    bool insertStationWithFacilitiesIntoDatabase(const QStringList &station, const QStringList &facilities);
-    bool insertStationWithoutFacilitiesIntoDatabase(const QStringList &station);
-    bool insertPlatformIntoDatabase(const QStringList &stop);
+    QFuture<bool> insertStationWithFacilitiesIntoDatabase(const QStringList &station, const QStringList &facilities);
+    QFuture<bool> insertStationWithoutFacilitiesIntoDatabase(const QStringList &station);
+    QFuture<bool> insertPlatformIntoDatabase(const QStringList &stop);
     CSA::Station *fetchStationFromCache(const QUrl &uri) const;
     void addStationToCache(CSA::Station *station);
     QMap<QUrl, QString> getPlatformsByStationURI(const QUrl &uri);

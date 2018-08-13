@@ -102,6 +102,25 @@ bool Database::Manager::execute(QSqlQuery &query)
 /**
  * @file databasemanager.cpp
  * @author Dylan Van Assche
+ * @date 13 Aug 2018
+ * @brief Executes a given QSqlQuery asynchronous
+ * @param QSqlQuery query
+ * @return bool success
+ * @package Database
+ * @public
+ * Executes the given QSqlQuery query asynchronous on the active database.
+ * Before the execution takes place, the connection is checked.
+ * During the execution, the errors are catched and logged as CRITICAL.
+ */
+QFuture<bool> Database::Manager::executeAsync(QSqlQuery &query)
+{
+    QFuture<bool> future = QtConcurrent::run(this, &Database::Manager::execute, query);
+    return future;
+}
+
+/**
+ * @file databasemanager.cpp
+ * @author Dylan Van Assche
  * @date 9 Aug 2018
  * @brief Starts the transaction
  * @return bool success

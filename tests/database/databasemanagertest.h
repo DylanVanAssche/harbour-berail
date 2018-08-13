@@ -20,10 +20,11 @@
 #ifndef DATABASEMANAGERTEST_H
 #define DATABASEMANAGERTEST_H
 
-#include <QObject>
+#include <QtCore/QObject>
+#include <QtCore/QFuture>
 #include <QtTest/QtTest>
-#include <QSignalSpy>
-#include <QSqlQuery>
+#include <QtTest/QSignalSpy>
+#include <QtSql/QSqlQuery>
 #include "../src/database/databasemanager.h"
 
 namespace Database {
